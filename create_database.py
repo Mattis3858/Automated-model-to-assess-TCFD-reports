@@ -10,33 +10,20 @@ import os
 import shutil
 import pandas as pd
 
-# Load environment variables. Assumes that project contains .env file with API keys
 load_dotenv()
-#---- Set OpenAI API key 
-# Change environment variable name from "OPENAI_API_KEY" to the name given in 
-# your .env file.
 openai.api_key = os.environ['OPENAI_API_KEY']
 
-# try:
-#     test_embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
-#     print("OpenAI Embeddings initialized successfully.")
-# except Exception as e:
-#     print(f"Error initializing OpenAI Embeddings: {e}")
-
-
 CHROMA_PATH = "chroma"
-
 EXCEL_PATH = "data/tcfd第四層揭露指引.xlsx"
 
 
 def main():
     generate_data_store()
-    # return
 
 
 def generate_data_store():
     documents = load_documents_from_excel()
-    if documents:  # Only proceed if we have valid documents
+    if documents:
         chunks = split_text(documents)
         save_to_chroma(chunks)
     else:
@@ -45,28 +32,21 @@ def generate_data_store():
 
 def load_documents_from_excel():
     try:
-        # Load the Excel file
         df = pd.read_excel(EXCEL_PATH)
         
-        # Print column names to help with debugging
         print("Available columns:", df.columns.tolist())
         
         documents = []
         for idx, row in df.iterrows():
-            # Get the text content and handle NaN values
             text = row['Definition']
             category = row['Label']
             
-            # Skip rows where either text or category is NaN/empty
             if pd.isna(text) or pd.isna(category):
                 print(f"Skipping row {idx + 2} due to missing data")
                 continue
-            
-            # Convert to string and strip whitespace
             text = str(text).strip()
             category = str(category).strip()
             
-            # Only add non-empty documents
             if text and category:
                 metadata = {'類別': category}
                 try:

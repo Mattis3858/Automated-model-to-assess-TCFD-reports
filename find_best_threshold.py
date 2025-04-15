@@ -11,21 +11,17 @@ CHUNK_CSV_DIRECTORY = "data/tcfd_report_pdf_chunks_第四層/"
 OUTPUT_CSV_DIRECTORY = "data/tcfd_report_pdf_chunks_matching_result_第四層/"
 ANSWER_PATH = "data/answer/rank.xlsx"
 
-# Load environment variables
 load_dotenv()
 openai.api_key = os.environ['OPENAI_API_KEY']
 
-# Ensure output directory exists
 os.makedirs(OUTPUT_CSV_DIRECTORY, exist_ok=True)
 
-# Initialize OpenAIEmbeddings
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 def load_chunks_from_csv(csv_path):
     """Loads chunk embeddings and metadata from a specific CSV file."""
     return pd.read_csv(csv_path)
 
 # def query_chroma_for_similar_chunks(embedding):
-#     """Queries ChromaDB and returns the top 5 results with similarity above 0.7."""
 #     embedding = np.array(eval(embedding)).flatten()
 #     db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_model)
     
@@ -37,7 +33,7 @@ def load_chunks_from_csv(csv_path):
 #     return filtered_results
 
 def query_chroma_for_similar_chunks(embedding, threshold):
-    """Queries ChromaDB and returns the top 5 results with similarity above 0.7."""
+
     embedding = np.array(eval(embedding)).flatten()
     db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_model)
     # print(type(threshold))
@@ -74,7 +70,6 @@ def query_chroma_for_similar_chunks(embedding, threshold):
     return filtered_results
 
 def process_chunks_and_save(csv_path):
-    """Processes each chunk in a CSV file, queries Chroma, and saves results to a corresponding CSV."""
     df_chunks = load_chunks_from_csv(csv_path)
     output_data = []
 
@@ -84,14 +79,12 @@ def process_chunks_and_save(csv_path):
         chunk_id = row['Chunk_ID']
         chunk_text = row['Chunk_Text']
         
-        # Query ChromaDB for similar chunks
         results = query_chroma_for_similar_chunks(embedding)
         matching_categories = [doc['類別'] for doc in results]
         unique_categories = list(set(matching_categories))
         cosine_distance = [doc['cosine_distance'] for doc in results]
         cosine_distance = list(set(cosine_distance))
 
-        # Record results
         output_data.append({
             'Filename': file_name,
             'Chunk_ID': chunk_id,
@@ -101,12 +94,10 @@ def process_chunks_and_save(csv_path):
             # "Cosine_Distance": cosine_distance
         })
 
-    # Generate output file path
     base_name = os.path.basename(csv_path).replace("chunk_embeddings_", "").replace(".csv", "")
     output_file_name = f"{base_name}_matched_chunks.csv"
     output_file_path = os.path.join(OUTPUT_CSV_DIRECTORY, output_file_name)
     
-    # Save to CSV
     output_df = pd.DataFrame(output_data)
     output_df.to_csv(output_file_path, index=False)
     print(f"Saved matched chunks and categories to {output_file_path}.")
@@ -166,7 +157,6 @@ def calculate_accuracy(answer, report_dict):
 
         question_id = key[1:]  # 去掉 'Q' 提取後面的部分
 
-        # 搜尋第二份資料的 Matched_Categories
         matched_categories = []
         for entry in report_dict:
             if 'Matched_Categories' in entry:
@@ -178,11 +168,11 @@ def calculate_accuracy(answer, report_dict):
         if question_id in matched_categories:
             # 第二份資料中有出現此類別
             if value == 1.0:
-                correct_count += 1  # 答對
+                correct_count += 1
         else:
             # 第二份資料中沒有出現此類別
             if value == 0.0:
-                correct_count += 1  # 答對
+                correct_count += 1
 
     accuracy = correct_count / total_questions
     return accuracy
@@ -216,10 +206,7 @@ def optimize_threshold():
 
 def main():
     accuracy_list = optimize_threshold()
-    # 指定輸出檔案名稱
     output_file = "data/accuracy_list.csv"
-    
-    # 儲存到 CSV 檔案
     accuracy_list.to_csv(output_file, index=False)
     
     print(f"Accuracy list saved to {output_file}.")
