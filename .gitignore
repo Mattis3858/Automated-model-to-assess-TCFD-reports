@@ -1,0 +1,12 @@
+/__pycache__
+/chroma
+.DS_Store
+/venv
+.env
+/myenv.env
+/myenv
+chroma
+__pycache__
+.qodo
+data
+rag_for_tcfd_reports
