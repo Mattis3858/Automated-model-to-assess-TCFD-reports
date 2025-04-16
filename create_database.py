@@ -14,7 +14,7 @@ load_dotenv()
 openai.api_key = os.environ['OPENAI_API_KEY']
 
 CHROMA_PATH = "chroma"
-EXCEL_PATH = "data/tcfd第四層揭露指引.xlsx"
+CSV_PATH = "data/filtered_揭露指引.csv"
 
 
 def main():
@@ -32,7 +32,7 @@ def generate_data_store():
 
 def load_documents_from_excel():
     try:
-        df = pd.read_excel(EXCEL_PATH)
+        df = pd.read_csv(CSV_PATH, encoding='utf-8')
         
         print("Available columns:", df.columns.tolist())
         
@@ -60,7 +60,7 @@ def load_documents_from_excel():
         return documents
     
     except FileNotFoundError:
-        print(f"Excel file not found at path: {EXCEL_PATH}")
+        print(f"Excel file not found at path: {CSV_PATH}")
         return []
     except Exception as e:
         print(f"Error loading Excel file: {e}")
