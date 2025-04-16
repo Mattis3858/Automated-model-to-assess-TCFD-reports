@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 from langchain_openai import OpenAIEmbeddings
-from langchain_chroma import Chroma  # Updated import path based on deprecation notice
+from langchain_chroma import Chroma
 from dotenv import load_dotenv
 import openai 
 
@@ -18,7 +18,6 @@ os.makedirs(OUTPUT_CSV_DIRECTORY, exist_ok=True)
 
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 def load_chunks_from_csv(csv_path):
-    """Loads chunk embeddings and metadata from a specific CSV file."""
     return pd.read_csv(csv_path)
 
 # def query_chroma_for_similar_chunks(embedding):
@@ -155,22 +154,20 @@ def calculate_accuracy(answer, report_dict):
         if isinstance(value, float) and str(value) == 'nan':
             continue
 
-        question_id = key[1:]  # 去掉 'Q' 提取後面的部分
+        question_id = key[1:]
 
         matched_categories = []
         for entry in report_dict:
             if 'Matched_Categories' in entry:
                 for category in entry['Matched_Categories']:
-                    clean_category = category.replace('#', '')  # 移除井字號
-                    matched_categories.append(clean_category.split('_')[-1])  # 取最後的部分
+                    clean_category = category.replace('#', '')
+                    matched_categories.append(clean_category.split('_')[-1])
         print(question_id)
         print(matched_categories)
         if question_id in matched_categories:
-            # 第二份資料中有出現此類別
             if value == 1.0:
                 correct_count += 1
         else:
-            # 第二份資料中沒有出現此類別
             if value == 0.0:
                 correct_count += 1
 
