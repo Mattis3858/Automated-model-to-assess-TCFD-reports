@@ -13,20 +13,20 @@ OUTPUT_CSV_DIRECTORY = "data/tcfd_report_pdf_chunks_matching_result_第四層/"
 
 load_dotenv()
 openai.api_key = os.environ['OPENAI_API_KEY']
-
+embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
+db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_model)
 os.makedirs(OUTPUT_CSV_DIRECTORY, exist_ok=True)
 
-embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 def load_chunks_from_csv(csv_path):
     return pd.read_csv(csv_path)
 
 def query_chroma_for_similar_chunks(embedding):
     embedding = np.array(eval(embedding)).flatten()
-    db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_model)
+    
     
     results = db.similarity_search_by_vector_with_relevance_scores(embedding, k=91)
     filtered_results = [
-        {"類別": doc[0].metadata['類別'], "content": doc[0].page_content, "cosine_distance": doc[1]}
+        {"類別": doc[0].metadata['label'], "content": doc[0].page_content, "cosine_distance": doc[1]}
         for doc in results if doc[1] < 0.20
     ]
     return filtered_results
