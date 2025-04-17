@@ -17,7 +17,7 @@ os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
 
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 
-CHUNK_SIZE = 300
+CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 
 def load_pdf(file_path):

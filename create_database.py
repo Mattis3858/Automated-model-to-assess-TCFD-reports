@@ -60,15 +60,15 @@ def load_documents_from_excel():
         return documents
     
     except FileNotFoundError:
-        print(f"Excel file not found at path: {CSV_PATH}")
+        print(f"CSV file not found at path: {CSV_PATH}")
         return []
     except Exception as e:
-        print(f"Error loading Excel file: {e}")
+        print(f"Error loading CSV file: {e}")
         return []
 
 def split_text(documents: list[Document]):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=8000,
+        chunk_size=8190,
         chunk_overlap=4000,
         length_function=len,
         add_start_index=True,
