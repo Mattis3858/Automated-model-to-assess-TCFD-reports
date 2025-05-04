@@ -10,3 +10,4 @@ __pycache__
 .qodo
 data
 rag_for_tcfd_reports
+chroma_tcfd/
