@@ -15,6 +15,7 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 
 CHROMA_PATH = "chroma"
 CSV_PATH = "data/filtered_揭露指引.csv"
+# EXCEL_PATH = "data/tcfd第四層接露指引 - 加上關鍵字.xlsx"
 
 BATCH_SIZE = 50
 
@@ -24,6 +25,7 @@ def main():
 
 def generate_data_store():
     df = pd.read_csv(CSV_PATH, usecols=['Label', 'Definition'], encoding='utf-8')
+    # df = pd.read_excel(EXCEL_PATH, usecols=['Label', 'Definition'])
     df = df.drop_duplicates(subset='Definition').reset_index(drop=True)
 
     documents = []
