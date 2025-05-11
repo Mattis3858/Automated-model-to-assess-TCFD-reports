@@ -11,3 +11,4 @@ __pycache__
 data
 rag_for_tcfd_reports
 chroma_tcfd/
+analysis_code/analysis_results
