@@ -76,10 +76,8 @@ import shutil
 import pandas as pd
 import openai
 
-# 新增：讓 dotenv 自動往上層找 .env
 from dotenv import load_dotenv, find_dotenv
 
-# find_dotenv() 會從當前工作目錄一路往上，找到第一個 .env 為止
 env_path = find_dotenv()
 if not env_path:
     raise FileNotFoundError("找不到 .env 檔，請確認專案根目錄下有 .env")
@@ -93,15 +91,17 @@ print(f"OPENAI_API_KEY length: {len(os.environ.get('OPENAI_API_KEY',''))}")
 openai.api_key = os.environ['OPENAI_API_KEY']
 
 CHROMA_PATH = "chroma"
-CSV_PATH = "data/filtered_揭露指引.csv"
-
+# CSV_PATH = "data/filtered_揭露指引.csv"
+XLSX_PATH = "data/tcfd第四層揭露指引.xlsx"
 BATCH_SIZE = 50
 
 def main():
     generate_data_store()
 
 def generate_data_store():
-    df = pd.read_csv(CSV_PATH, usecols=['Label', 'Definition'], encoding='utf-8')
+    # df = pd.read_csv(CSV_PATH, usecols=['Label', 'Definition'], encoding='utf-8')
+    df = pd.read_excel(XLSX_PATH, usecols=['Label', 'Definition'])
+    
     df = df.drop_duplicates(subset='Definition').reset_index(drop=True)
 
     documents = []
