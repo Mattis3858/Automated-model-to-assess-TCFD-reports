@@ -1,0 +1,9 @@
+2025-06-06 23:03:43,387 - INFO - Initialized embedding model: text-embedding-ada-002
+2025-06-06 23:03:43,409 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-06 23:03:43,599 - INFO - Initialized Chroma database at chroma
+2025-06-06 23:03:43,600 - INFO - Found 1 chunk CSV files to process. Starting parallel execution...
+2025-06-06 23:03:43,601 - INFO - Starting processing for chunk_embeddings_臺灣銀行_2022_500_50.csv...
+2025-06-06 23:03:44,360 - INFO - Successfully loaded 120 chunks from chunk_embeddings_臺灣銀行_2022_500_50.csv
+2025-06-06 23:03:45,091 - INFO - Results for chunk_embeddings_臺灣銀行_2022_500_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_第四層/臺灣銀行_2022_500_50_matched_chunks.csv.
+2025-06-06 23:03:45,093 - INFO - Finished processing chunk_embeddings_臺灣銀行_2022_500_50.csv.
+2025-06-06 23:03:45,094 - INFO - All chunk CSV processing tasks completed.
