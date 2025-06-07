@@ -100,7 +100,7 @@ def main():
 
 def generate_data_store():
     # df = pd.read_csv(CSV_PATH, usecols=['Label', 'Definition'], encoding='utf-8')
-    df = pd.read_excel(XLSX_PATH, usecols=['Label', 'Definition'])
+    df = pd.read_excel(XLSX_PATH, usecols=['Label', 'Definition'], sheet_name='工作表2')
     
     df = df.drop_duplicates(subset='Definition').reset_index(drop=True)
 

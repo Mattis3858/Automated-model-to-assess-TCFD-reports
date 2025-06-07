@@ -20,7 +20,7 @@ os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
 
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 
-CHUNK_SIZE = 500
+CHUNK_SIZE = 300
 CHUNK_OVERLAP = 50
 BATCH_SIZE = 8
 MAX_WORKERS = 4
