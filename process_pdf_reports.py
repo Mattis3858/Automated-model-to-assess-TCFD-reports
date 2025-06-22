@@ -20,10 +20,16 @@ os.makedirs(OUTPUT_DIRECTORY, exist_ok=True)
 
 embedding_model = OpenAIEmbeddings(model="text-embedding-ada-002")
 
-CHUNK_SIZE = 300
+CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 BATCH_SIZE = 8
 MAX_WORKERS = 4
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[logging.StreamHandler()]
+)
 
 def load_pdf(file_path):
     text = ""
@@ -120,9 +126,9 @@ def main():
             output_file_name = f"chunk_embeddings_{company_name}_{year}_{CHUNK_SIZE}_{CHUNK_OVERLAP}.csv"
             output_file_path = os.path.join(OUTPUT_DIRECTORY, output_file_name)
 
-            if os.path.exists(output_file_path):
-                logging.info(f"Skipping {os.path.basename(file_path)}: CSV file already exists ({os.path.basename(output_file_path)})")
-                continue
+            # if os.path.exists(output_file_path):
+            #     logging.info(f"Skipping {os.path.basename(file_path)}: CSV file already exists ({os.path.basename(output_file_path)})")
+            #     continue
             
             pdf_files_to_process.append((file_path, output_file_path))
 

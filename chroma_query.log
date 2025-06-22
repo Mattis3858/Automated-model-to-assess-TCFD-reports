@@ -115,3 +115,47 @@
 2025-06-08 00:14:48,528 - INFO - Results for chunk_embeddings_ッ伦北_2022_300_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/ッ伦北_2022_300_50_matched_chunks.csv.
 2025-06-08 00:14:48,530 - INFO - Finished processing chunk_embeddings_ッ伦北_2022_300_50.csv.
 2025-06-08 00:14:48,532 - INFO - All chunk CSV processing tasks completed.
+2025-06-08 15:03:12,625 - INFO - Initialized embedding model: text-embedding-ada-002
+2025-06-08 15:03:12,651 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-08 15:03:12,820 - INFO - Initialized Chroma database at chroma
+2025-06-08 15:03:12,821 - INFO - Found 1 chunk CSV files to process. Starting parallel execution...
+2025-06-08 15:03:12,821 - INFO - Starting processing for chunk_embeddings_じ北_2022_300_50.csv...
+2025-06-08 15:03:13,985 - INFO - Successfully loaded 199 chunks from chunk_embeddings_じ北_2022_300_50.csv
+2025-06-08 15:03:14,875 - INFO - Results for chunk_embeddings_じ北_2022_300_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/じ北_2022_300_50_matched_chunks.csv.
+2025-06-08 15:03:14,877 - INFO - Finished processing chunk_embeddings_じ北_2022_300_50.csv.
+2025-06-08 15:03:14,877 - INFO - All chunk CSV processing tasks completed.
+2025-06-08 15:19:28,615 - INFO - Initialized embedding model: text-embedding-ada-002
+2025-06-08 15:19:28,640 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-08 15:19:28,835 - INFO - Initialized Chroma database at chroma
+2025-06-08 15:19:28,836 - INFO - Found 1 chunk CSV files to process. Starting parallel execution...
+2025-06-08 15:19:28,836 - INFO - Starting processing for chunk_embeddings_じ北_2022_300_50.csv...
+2025-06-08 15:19:30,006 - INFO - Successfully loaded 199 chunks from chunk_embeddings_じ北_2022_300_50.csv
+2025-06-08 15:19:30,938 - INFO - Results for chunk_embeddings_じ北_2022_300_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/じ北_2022_300_50_matched_chunks.csv.
+2025-06-08 15:19:30,939 - INFO - Finished processing chunk_embeddings_じ北_2022_300_50.csv.
+2025-06-08 15:19:30,939 - INFO - All chunk CSV processing tasks completed.
+2025-06-08 19:39:29,866 - INFO - Initialized embedding model: text-embedding-ada-002
+2025-06-08 19:39:29,890 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-08 19:39:30,054 - INFO - Initialized Chroma database at chroma
+2025-06-08 19:39:30,055 - INFO - Found 1 chunk CSV files to process. Starting parallel execution...
+2025-06-08 19:39:30,056 - INFO - Starting processing for chunk_embeddings_坝蝗_2022_300_50.csv...
+2025-06-08 19:39:30,762 - INFO - Successfully loaded 127 chunks from chunk_embeddings_坝蝗_2022_300_50.csv
+2025-06-08 19:39:31,479 - INFO - Results for chunk_embeddings_坝蝗_2022_300_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/坝蝗_2022_300_50_matched_chunks.csv.
+2025-06-08 19:39:31,481 - INFO - Finished processing chunk_embeddings_坝蝗_2022_300_50.csv.
+2025-06-08 19:39:31,481 - INFO - All chunk CSV processing tasks completed.
+2025-06-08 21:18:00,499 - INFO - Initialized embedding model: text-embedding-ada-002
+2025-06-08 21:18:00,517 - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-08 21:18:00,678 - INFO - Initialized Chroma database at chroma
+2025-06-08 21:18:00,679 - INFO - Found 3 chunk CSV files to process. Starting parallel execution...
+2025-06-08 21:18:00,680 - INFO - Starting processing for chunk_embeddings_畐北_2023_500_50.csv...
+2025-06-08 21:18:00,680 - INFO - Starting processing for chunk_embeddings_碔ü北_2023_500_50.csv...
+2025-06-08 21:18:00,681 - INFO - Starting processing for chunk_embeddings_ッ伦北_2023_500_50.csv...
+2025-06-08 21:18:01,752 - INFO - Successfully loaded 95 chunks from chunk_embeddings_畐北_2023_500_50.csv
+2025-06-08 21:18:02,050 - INFO - Successfully loaded 122 chunks from chunk_embeddings_碔ü北_2023_500_50.csv
+2025-06-08 21:18:03,236 - INFO - Successfully loaded 248 chunks from chunk_embeddings_ッ伦北_2023_500_50.csv
+2025-06-08 21:18:05,469 - INFO - Results for chunk_embeddings_畐北_2023_500_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/畐北_2023_500_50_matched_chunks.csv.
+2025-06-08 21:18:05,471 - INFO - Finished processing chunk_embeddings_畐北_2023_500_50.csv.
+2025-06-08 21:18:05,787 - INFO - Results for chunk_embeddings_碔ü北_2023_500_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/碔ü北_2023_500_50_matched_chunks.csv.
+2025-06-08 21:18:05,789 - INFO - Finished processing chunk_embeddings_碔ü北_2023_500_50.csv.
+2025-06-08 21:18:06,557 - INFO - Results for chunk_embeddings_ッ伦北_2023_500_50.csv saved to data/tcfd_report_pdf_chunks_matching_result_材糷/ッ伦北_2023_500_50_matched_chunks.csv.
+2025-06-08 21:18:06,560 - INFO - Finished processing chunk_embeddings_ッ伦北_2023_500_50.csv.
+2025-06-08 21:18:06,561 - INFO - All chunk CSV processing tasks completed.
