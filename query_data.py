@@ -18,7 +18,7 @@ class Config:
     OUTPUT_CSV_DIRECTORY = "data/tcfd_report_pdf_chunks_matching_result_第四層/"
 
     COSINE_DISTANCE_THRESHOLD = 1.0
-    TOP_K_SIMILAR_CHUNKS = 20
+    TOP_K_SIMILAR_CHUNKS = 91
 
     EMBEDDING_MODEL_NAME = "text-embedding-ada-002"
     MAX_WORKERS = 4
