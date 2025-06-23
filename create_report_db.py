@@ -61,7 +61,8 @@ def process_pdf(pdf_path):
         db = Chroma.from_documents(
             documents=documents,
             embedding=OpenAIEmbeddings(),
-            persist_directory=chroma_path
+            persist_directory=chroma_path,  
+            **{"collection_metadata": {"hnsw:space": "cosine"}}
         )
         db.persist()
         print(f"[SUCCESS] {pdf_name} 的 ChromaDB 已建立並儲存至 '{chroma_path}'")
