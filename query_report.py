@@ -19,7 +19,7 @@ def main():
     # 常數設定
     GUIDELINES_PATH = 'data/tcfd第四層揭露指引.xlsx'  # Excel 檔案路徑
     CHROMA_DIR = os.path.join('chroma_report', '永豐金控_2023')  # ChromaDB 資料夾
-    TOP_K = 3  # 每個揭露指引取最相關的 chunk 數量
+    TOP_K = 5  # 每個揭露指引取最相關的 chunk 數量
 
     # 載入揭露指引列表
     guidelines = load_guidelines(GUIDELINES_PATH)
