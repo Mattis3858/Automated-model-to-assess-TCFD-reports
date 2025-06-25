@@ -19,7 +19,7 @@ def main():
 
     # ▶︎ 常數設定
     GUIDELINES_PATH = 'data/tcfd第四層揭露指引.xlsx'
-    CHROMA_DIR      = os.path.join('chroma_report', '瑞興銀行_2023')
+    CHROMA_DIR      = os.path.join('chroma_report', '開發金_2023')
 
     CANDIDATE_K = 50
     TOP_N       = 10
@@ -64,9 +64,9 @@ def main():
 
     # ▶︎ 輸出 CSV
     out_df = pd.DataFrame(output_records)
-    out_df.to_csv('瑞興銀行2023_output_chunks.csv',
+    out_df.to_csv('開發金2023_output_chunks.csv',
                   index=False, encoding='utf-8-sig')
-    print('\nCSV 已輸出：瑞興銀行2023_output_chunks.csv')
+    print('\nCSV 已輸出：開發金2023_output_chunks.csv')
 
 if __name__ == '__main__':
     main()
