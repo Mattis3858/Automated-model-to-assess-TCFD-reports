@@ -72,7 +72,7 @@ def process_pdf(pdf_path):
 
 def main():
     pdf_paths = [
-        "data/tcfd_report_pdf_preprocessed/tcfd_report_pdf_preprocessed_2023/臺灣銀行_2023.pdf"
+        "data/tcfd_report_pdf_preprocessed/tcfd_report_pdf_preprocessed_2023/富邦金控_2023.pdf"
     ]
 
     for pdf_path in pdf_paths:
