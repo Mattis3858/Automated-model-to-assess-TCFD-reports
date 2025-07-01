@@ -72,7 +72,12 @@ def process_pdf(pdf_path):
 
 def main():
     pdf_paths = [
-        "data/tcfd_report_pdf_preprocessed/tcfd_report_pdf_preprocessed_2023/富邦金控_2023.pdf"
+        "data/tcfd_reports_pdf/2023/富邦金控_2023.pdf",
+        "data/tcfd_reports_pdf/2023/合庫金控_2023.pdf",
+        "data/tcfd_reports_pdf/2023/永豐金控_2023.pdf",
+        "data/tcfd_reports_pdf/2023/開發金控_2023.pdf",
+        "data/tcfd_reports_pdf/2023/瑞興銀行_2023.pdf",
+        "data/tcfd_reports_pdf/2023/臺灣銀行_2023.pdf"
     ]
 
     for pdf_path in pdf_paths:
