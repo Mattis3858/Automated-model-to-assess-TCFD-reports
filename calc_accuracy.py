@@ -42,3 +42,9 @@ if __name__ == '__main__':
     xlsx_path         = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
     pred_xlsx_path    = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_flags.xlsx'
     compute_accuracy(xlsx_path, pred_xlsx_path)
+    xlsx_path         = 'data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx'
+    pred_xlsx_path    = 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_flags.xlsx'
+    compute_accuracy(xlsx_path, pred_xlsx_path)
+    xlsx_path         = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
+    pred_xlsx_path    = 'data/2023_query_result/富邦金控_2023_output_chunks_with_flags.xlsx'
+    compute_accuracy(xlsx_path, pred_xlsx_path)
