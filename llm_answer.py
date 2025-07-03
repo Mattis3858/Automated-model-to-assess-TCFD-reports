@@ -60,6 +60,6 @@ def fill_tcfd_flags(
     print(f"已儲存結果至：{output_xlsx}")
 
 if __name__ == "__main__":
-    INPUT_XLSX       = "data/2023_query_result/臺灣銀行_2023_output_chunks.xlsx"
+    INPUT_XLSX       = "data/2023_query_result/富邦金控_2023_output_chunks.xlsx"
     GUIDELINES_XLSX  = "data/tcfd第四層揭露指引.xlsx"
     fill_tcfd_flags(INPUT_XLSX, GUIDELINES_XLSX)
