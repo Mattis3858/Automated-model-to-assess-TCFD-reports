@@ -1,9 +1,9 @@
 import pandas as pd
 
-def compute_accuracy(xlsx_path, pred_xlsx_path):
+def compute_accuracy(xlsx_path, pred_csv_path):
     # 讀取檔案
     truth_df = pd.read_excel(xlsx_path)
-    pred_df  = pd.read_excel(pred_xlsx_path)     # ← 這裡改成 read_excel
+    pred_df  = pd.read_csv(pred_csv_path)
 
     # 依 Label、頁數、Chunk ID 排序，確保對齊
     key_cols = ['Label', '報告書頁數', 'Chunk ID']
@@ -40,11 +40,11 @@ def compute_accuracy(xlsx_path, pred_xlsx_path):
 
 if __name__ == '__main__':
     xlsx_path         = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
-    pred_xlsx_path    = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_flags.xlsx'
-    compute_accuracy(xlsx_path, pred_xlsx_path)
-    xlsx_path         = 'data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx'
-    pred_xlsx_path    = 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_flags.xlsx'
-    compute_accuracy(xlsx_path, pred_xlsx_path)
-    xlsx_path         = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
-    pred_xlsx_path    = 'data/2023_query_result/富邦金控_2023_output_chunks_with_flags.xlsx'
-    compute_accuracy(xlsx_path, pred_xlsx_path)
+    pred_csv_path    = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_CoT_v1.csv'
+    compute_accuracy(xlsx_path, pred_csv_path)
+    # xlsx_path         = 'data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx'
+    # pred_csv_path    = 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_CoT_v1.csv'
+    # compute_accuracy(xlsx_path, pred_csv_path)
+    # xlsx_path         = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
+    # pred_csv_path    = 'data/2023_query_result/富邦金控_2023_output_chunks_with_CoT_v1.csv'
+    # compute_accuracy(xlsx_path, pred_csv_path)
