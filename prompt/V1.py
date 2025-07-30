@@ -9,6 +9,11 @@ PROMPT = """
         - TCFD 揭露標準：
         {label}
 
+        ### 正面範例 ###
+        以下是真實報告書中對應「{label}」的正面揭露範例，請參考其用詞與結構：
+        1. {positive_example1}
+        2. {positive_example2}
+
         ### 回復格式與例子 ###
         請以 JSON 格式輸出，每題一筆資料，包含以下必填欄位：
         1.  *reasoning*: string。請詳細說明你判斷是否有接露此揭露標準的完整推理過程。
@@ -18,13 +23,13 @@ PROMPT = """
         json 範例如下：
         1. {{"result":[
             {{
-                "reasoning": "報告書中提到「董事會定期審閱氣候風險報告」，明確符合該標準定義。",
+                "reasoning": "報告書中提到「...」，明確符合該標準定義。",
                 "is_disclosed": "Y"
             }}
         ]}}
         2. {{"result":[
             {{
-                "reasoning": "報告書中未具體說明是否有對氣候相關組織結構之描述。",
+                "reasoning": "報告書中未具體說明...之描述。",
                 "is_disclosed": "N"
             }}
         ]}}
