@@ -109,5 +109,5 @@ def process_tcfd_file(
 
 
 if __name__ == "__main__":
-    INPUT_XLSX = "data/2023_query_result/瑞興銀行_2023_output_chunks_fewshot.xlsx"
+    INPUT_XLSX = "data/2023_query_result/富邦金控_2023_output_chunks_fewshot.xlsx"
     process_tcfd_file(INPUT_XLSX)
