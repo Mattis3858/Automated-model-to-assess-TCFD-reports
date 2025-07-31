@@ -50,9 +50,9 @@ def compute_accuracy(xlsx_path, pred_xlsx_path, output_path):
 
 if __name__ == '__main__':
     datasets = [
-        ('data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx', 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_flags_v3.xlsx', '臺灣銀行_accuracy_results.xlsx'),
-        ('data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx', 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_flags_v3.xlsx', '瑞興銀行_accuracy_results.xlsx'),
-        ('data/2023_query_answer/富邦金控2023_output_chunks.xlsx', 'data/2023_query_result/富邦金控_2023_output_chunks_with_flags_v3.xlsx', '富邦金控_accuracy_results.xlsx'),
+        ('data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx', 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_flags_v4.xlsx', '臺灣銀行_accuracy_results.xlsx'),
+        ('data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx', 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_flags_v4.xlsx', '瑞興銀行_accuracy_results.xlsx'),
+        ('data/2023_query_answer/富邦金控2023_output_chunks.xlsx', 'data/2023_query_result/富邦金控_2023_output_chunks_with_flags_v4.xlsx', '富邦金控_accuracy_results.xlsx'),
     ]
 
     for truth_path, pred_path, output_path in datasets:

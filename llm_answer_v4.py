@@ -7,7 +7,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-MAX_WORKERS = 10
+MAX_WORKERS = 5
 
 def parse_llm_response(response_text: str) -> tuple[str, str]:
     try:
@@ -673,10 +673,17 @@ def fill_tcfd_flags_v4(
     yn_col = "是否真的有揭露此標準?(Y/N)"
     reason_col = "Reason"
 
-    if yn_col not in df.columns:
-        df[yn_col] = ""
-    if reason_col not in df.columns:
-        df[reason_col] = ""
+    # if yn_col not in df.columns:
+    #     df[yn_col] = ""
+    # if reason_col not in df.columns:
+    #     df[reason_col] = ""
+        
+    for col in (yn_col, reason_col):
+        if col not in df.columns:
+            df[col] = pd.Series(dtype="object")
+        else:
+            df[col] = df[col].astype("object")  
+
 
     tasks = []
     for idx, row in df.iterrows():
@@ -709,7 +716,7 @@ def fill_tcfd_flags_v4(
 
 
 if __name__ == "__main__":
-    INPUT_XLSX = "data/2023_query_result/瑞興銀行_2023_output_chunks.xlsx"
+    INPUT_XLSX = "data/2023_query_result/富邦金控_2023_output_chunks.xlsx"
     
     if not os.path.exists(INPUT_XLSX):
         print(f"錯誤：找不到輸入檔案 '{INPUT_XLSX}'。請確認路徑是否正確。")

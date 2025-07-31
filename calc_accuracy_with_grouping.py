@@ -135,19 +135,19 @@ if __name__ == '__main__':
         # 範例 1
         xlsx_path_1 = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
         # 將預測路徑的副檔名改為 .xlsx
-        pred_xlsx_path_1 = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_flags_v1.xlsx'
+        pred_xlsx_path_1 = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_flags_v4.xlsx'
         compute_accuracy_new(xlsx_path_1, pred_xlsx_path_1)
 
         # 範例 2
         xlsx_path_2 = 'data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx'
         # 將預測路徑的副檔名改為 .xlsx
-        pred_xlsx_path_2 = 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_flags_v1.xlsx'
+        pred_xlsx_path_2 = 'data/2023_query_result/瑞興銀行_2023_output_chunks_with_flags_v4.xlsx'
         compute_accuracy_new(xlsx_path_2, pred_xlsx_path_2)
         
         # 範例 3
         xlsx_path_3 = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
         # 將預測路徑的副檔名改為 .xlsx
-        pred_xlsx_path_3 = 'data/2023_query_result/富邦金控_2023_output_chunks_with_flags_v1.xlsx'
+        pred_xlsx_path_3 = 'data/2023_query_result/富邦金控_2023_output_chunks_with_flags_v4.xlsx'
         compute_accuracy_new(xlsx_path_3, pred_xlsx_path_3)
 
     except NameError:
