@@ -129,13 +129,13 @@ def compute_accuracy_new(xlsx_path, pred_csv_path):
 if __name__ == '__main__':
     try:
         # 範例 1
-        # xlsx_path_1 = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
-        # pred_csv_path_1 = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_CoT_v1.csv'
-        # compute_accuracy_new(xlsx_path_1, pred_csv_path_1)
+        xlsx_path_1 = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
+        pred_csv_path_1 = 'data/2023_query_result/臺灣銀行_2023_output_chunks_with_CoT_v1.csv'
+        compute_accuracy_new(xlsx_path_1, pred_csv_path_1)
 
-        # xlsx_path_1 = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
-        # pred_csv_path_1 = 'data/2023_query_result/臺灣銀行_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv'
-        # compute_accuracy_new(xlsx_path_1, pred_csv_path_1)
+        xlsx_path_1 = 'data/2023_query_answer/臺灣銀行2023_output_chunks.xlsx'
+        pred_csv_path_1 = 'data/2023_query_result/臺灣銀行_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv'
+        compute_accuracy_new(xlsx_path_1, pred_csv_path_1)
 
         # 範例 2
         xlsx_path_2 = 'data/2023_query_answer/瑞興銀行2023_output_chunks.xlsx'
@@ -146,9 +146,12 @@ if __name__ == '__main__':
         compute_accuracy_new(xlsx_path_2, pred_csv_path_2)
         
         # # 範例 3
-        # xlsx_path_3 = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
-        # pred_csv_path_3 = 'data/2023_query_result/富邦金控_2023_output_chunks_with_CoT_v1.csv'
-        # compute_accuracy_new(xlsx_path_3, pred_csv_path_3)
+        xlsx_path_3 = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
+        pred_csv_path_3 = 'data/2023_query_result/富邦金控_2023_output_chunks_with_CoT_v1.csv'
+        compute_accuracy_new(xlsx_path_3, pred_csv_path_3)
+        xlsx_path_3 = 'data/2023_query_answer/富邦金控2023_output_chunks.xlsx'
+        pred_csv_path_3 = 'data/2023_query_result/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv'
+        compute_accuracy_new(xlsx_path_3, pred_csv_path_3)
 
     except NameError:
         print("請在 'if __name__ == '__main__':' 區塊中設定您的檔案路徑。")
