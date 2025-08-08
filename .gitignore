@@ -1,5 +1,6 @@
 /__pycache__
 /chroma
+/chroma_report
 .DS_Store
 /venv
 .env
