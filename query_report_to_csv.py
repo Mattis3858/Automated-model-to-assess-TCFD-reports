@@ -19,7 +19,7 @@ def load_guidelines(excel_path: str, sheet_name: str = "工作表2"):
 def get_chroma_dirs(base_chroma_path: str):
     chroma_dirs = []
     if os.path.exists(base_chroma_path):
-        for item in os.listdir(base_chroma_path):
+        for item in sorted(os.listdir(base_chroma_path)):
             full_path = os.path.join(base_chroma_path, item)
             if os.path.isdir(full_path):
                 chroma_dirs.append(full_path)
@@ -42,7 +42,7 @@ def main():
 
     reranker = FlagReranker("BAAI/bge-reranker-v2-m3", use_fp16=True)
 
-    chroma_paths = get_chroma_dirs(BASE_CHROMA_PATH)[:60]
+    chroma_paths = get_chroma_dirs(BASE_CHROMA_PATH)[120:]
 
     if not chroma_paths:
         print(

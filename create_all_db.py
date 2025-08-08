@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 
 # ===== 可調參數 =====
 BASE_CHROMA_PATH = "chroma_report"
-PDF_ROOT = "data/TCFD_判讀用報告書/TCFD_銀行業報告書/TCFD_非金控下銀行報告書"
+PDF_ROOT = "data/handroll"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
