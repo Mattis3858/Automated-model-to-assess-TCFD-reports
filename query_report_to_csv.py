@@ -97,7 +97,7 @@ def main():
                     }
                 )
 
-        output_filename = f"data/2023_query_result/{company_name}_output_chunks.csv"
+        output_filename = f"data/handroll_query_result/{company_name}_output_chunks.csv"
         out_df = pd.DataFrame(output_records)
         out_df.to_csv(output_filename, index=False, encoding="utf-8-sig")
         print(f"\nCSV 已輸出：{output_filename}")
