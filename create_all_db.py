@@ -9,10 +9,11 @@ from tqdm.auto import tqdm
 
 # ===== 可調參數 =====
 BASE_CHROMA_PATH = "chroma_report"
-PDF_ROOT = "data/handroll"   
+PDF_ROOT = "data/TCFD_判讀用報告書/TCFD_銀行業報告書/TCFD_非金控下銀行報告書"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
+
 
 def find_all_pdfs(root_dir: str):
     pdfs = []
@@ -21,6 +22,7 @@ def find_all_pdfs(root_dir: str):
             if f.lower().endswith(".pdf"):
                 pdfs.append(os.path.join(r, f))
     return sorted(pdfs)
+
 
 def process_pdf(pdf_path: str):
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -38,9 +40,9 @@ def process_pdf(pdf_path: str):
     print(f"[INFO] {pdf_name} 分割後的文本塊數量：{len(documents)}")
 
     for i, doc in enumerate(documents):
-        page_num = doc.metadata.get('page', -1) + 1
-        doc.metadata['page'] = page_num
-        doc.metadata['chunk_id'] = str(i)
+        page_num = doc.metadata.get("page", -1) + 1
+        doc.metadata["page"] = page_num
+        doc.metadata["chunk_id"] = str(i)
 
     if documents:
         print("-" * 50)
@@ -55,12 +57,13 @@ def process_pdf(pdf_path: str):
     print(f"[INFO] Creating embeddings and storing in ChromaDB...")
     db = Chroma.from_documents(
         documents=documents,
-        embedding=OpenAIEmbeddings(),
+        embedding=OpenAIEmbeddings(chunk_size=20),
         persist_directory=chroma_path,
-        **{"collection_metadata": {"hnsw:space": EMBEDDING_SPACE}}
+        **{"collection_metadata": {"hnsw:space": EMBEDDING_SPACE}},
     )
     db.persist()
     print(f"[SUCCESS] {pdf_name} 的 ChromaDB 已建立：{chroma_path}")
+
 
 def main():
     load_dotenv()  # 只需 .env 有 OPENAI_API_KEY
@@ -72,6 +75,7 @@ def main():
     print(f"[INFO] 共找到 {len(pdf_paths)} 份 PDF。")
     for p in tqdm(pdf_paths, desc="建立 ChromaDB"):
         process_pdf(p)
+
 
 if __name__ == "__main__":
     main()
