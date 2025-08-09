@@ -3,7 +3,7 @@ import shutil
 from dotenv import load_dotenv, find_dotenv
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings  # ← 新版
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from tqdm.auto import tqdm
 
@@ -15,7 +15,6 @@ CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
 EMBED_MODEL = "text-embedding-3-small"  # 或 "text-embedding-3-large"
 
-
 def find_all_pdfs(root_dir: str):
     pdfs = []
     for r, _, files in os.walk(root_dir):
@@ -24,23 +23,21 @@ def find_all_pdfs(root_dir: str):
                 pdfs.append(os.path.join(r, f))
     return sorted(pdfs)
 
-
 def build_embedder():
-    """建立 OpenAI 向量嵌入器（顯式帶入 api_key，避免吃到錯誤的 org/project）"""
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("找不到 OPENAI_API_KEY，請確認 .env 是否正確載入。")
 
-    # 若你確定不要吃到任何殘留 org/project，可強制 None
-    # 也可以改成：organization=os.getenv("OPENAI_ORG") 或 project=os.getenv("OPENAI_PROJECT")
-    emb = OpenAIEmbeddings(
+    # 可選：提醒不是 sk-proj 的情況（避免又吃到系統殘留）
+    if not api_key.startswith("sk-proj"):
+        print("[WARN] 目前使用的不是 Project 金鑰（建議 sk-proj…）。")
+
+    return OpenAIEmbeddings(
         model=EMBED_MODEL,
         api_key=api_key,
-        # organization=None,
+        # organization=None,  # 若你不想吃到外部 org/project，可保留 None
         # project=None,
     )
-    return emb
-
 
 def process_pdf(pdf_path: str, embedder: OpenAIEmbeddings):
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
@@ -80,22 +77,25 @@ def process_pdf(pdf_path: str, embedder: OpenAIEmbeddings):
             persist_directory=chroma_path,
             **{"collection_metadata": {"hnsw:space": EMBEDDING_SPACE}},
         )
-        db.persist()
+        # Chroma 0.4+ 會自動 persist，不一定需要 db.persist()
+        try:
+            db.persist()
+        except Exception:
+            pass
         print(f"[SUCCESS] {pdf_name} 的 ChromaDB 已建立：{chroma_path}")
     except Exception as e:
-        # 這裡補一個更友好的提示，協助判斷是否為額度/專案/組織問題
         print("[ERROR] 建立向量或寫入 Chroma 失敗：", repr(e))
         print("        若訊息含有 insufficient_quota / 429，請確認：")
-        print("        1) OPENAI_API_KEY 是否正確、未過期且對應到有額度的帳戶/Project")
-        print("        2) 是否有殘留 OPENAI_ORG / OPENAI_PROJECT / OPENAI_API_BASE 造成導流")
+        print("        1) OPENAI_API_KEY 是否為 sk-proj…，且對應到有額度的 Project")
+        print("        2) 是否有殘留系統環境變數（OPENAI_ORG / OPENAI_PROJECT / OPENAI_API_BASE）")
         print("        3) Billing 的 Hard limit 是否太低")
         raise
 
-
 def main():
-    # 明確載入當前工作目錄的 .env，避免 OneDrive 多份檔案誤載
+    # 這裡加 override=True，確保 .env 會覆蓋任何外部環境變數
     env_path = find_dotenv(usecwd=True)
-    load_dotenv(env_path)
+    load_dotenv(env_path, override=True)
+
     print("[ENV] dotenv:", env_path or "<not found>")
     print("[ENV] OPENAI_API_KEY(prefix):", (os.getenv("OPENAI_API_KEY", "")[:7] + "…") or "<missing>")
     print("[ENV] OPENAI_ORG:", os.getenv("OPENAI_ORG") or "<unset>")
@@ -105,7 +105,6 @@ def main():
     print("[CFG] CHUNK_SIZE:", CHUNK_SIZE, "CHUNK_OVERLAP:", CHUNK_OVERLAP)
 
     os.makedirs(BASE_CHROMA_PATH, exist_ok=True)
-
     embedder = build_embedder()
 
     pdf_paths = find_all_pdfs(PDF_ROOT)
@@ -116,7 +115,6 @@ def main():
     print(f"[INFO] 共找到 {len(pdf_paths)} 份 PDF。")
     for p in tqdm(pdf_paths, desc="建立 ChromaDB"):
         process_pdf(p, embedder)
-
 
 if __name__ == "__main__":
     main()

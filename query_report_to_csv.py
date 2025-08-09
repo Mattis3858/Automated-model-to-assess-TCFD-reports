@@ -54,7 +54,7 @@ def main():
 
     for chroma_dir in chroma_paths:
         company_name = os.path.basename(chroma_dir)
-        output_filename = f"data/2023_query_result/{company_name}_output_chunks.csv"
+        output_filename = f"data/handroll_query_result/{company_name}_output_chunks.csv"
 
         if os.path.exists(output_filename):
             print(f"[INFO] 檔案 '{output_filename}' 已存在，跳過處理 {company_name}。")
