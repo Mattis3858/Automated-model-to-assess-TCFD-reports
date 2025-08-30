@@ -8,8 +8,8 @@ from langchain_community.vectorstores import Chroma
 from tqdm.auto import tqdm
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_report"
-PDF_ROOT = "data/handroll"
+BASE_CHROMA_PATH = "chroma_esg_report"
+PDF_ROOT = "data/金控銀行業永續報告書"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"

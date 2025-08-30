@@ -17,7 +17,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from prompt.V1 import PROMPT
 
 
-INPUT_DIR = "data/handroll_query_result"
+INPUT_DIR = "data/永續報告書_query_result"
 INPUT_PATTERN = "*_output_chunks.csv"   
 POS_EXAMPLE_SOURCE = "data/2023_query_result/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 

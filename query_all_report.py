@@ -29,8 +29,8 @@ def main():
     openai.api_key = os.getenv('OPENAI_API_KEY')
 
     GUIDELINES_PATH = 'data/tcfd第四層揭露指引.xlsx'
-    BASE_CHROMA_PATH = 'chroma_report'
-    OUTPUT_DIR = 'data/handroll_query_result'
+    BASE_CHROMA_PATH = 'chroma_esg_report'
+    OUTPUT_DIR = 'data/永續報告書_query_result'
 
     CANDIDATE_K = 50
     TOP_N = 5  
