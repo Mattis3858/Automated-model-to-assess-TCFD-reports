@@ -2,9 +2,10 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 from tqdm.auto import tqdm
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from FlagEmbedding import FlagReranker
+import torch
 
 def load_guidelines(excel_path: str, sheet_name: str = '工作表2'):
     df = pd.read_excel(excel_path, sheet_name=sheet_name)
@@ -24,22 +25,24 @@ def get_chroma_dirs(base_chroma_path: str):
     return sorted(chroma_dirs)
 
 def main():
-    load_dotenv()
-    import openai
-    openai.api_key = os.getenv('OPENAI_API_KEY')
 
     GUIDELINES_PATH = 'data/tcfd第四層揭露指引.xlsx'
-    BASE_CHROMA_PATH = 'chroma_report'
-    OUTPUT_DIR = 'data/handroll_query_result'
+    BASE_CHROMA_PATH = 'chroma_report_TNFD'
+    OUTPUT_DIR = 'data/TNFD_query_result'
 
     CANDIDATE_K = 50
     TOP_N = 5  
+    EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-0.6B"
 
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"[INFO] Using device: {device}")
+    print("CUDA 可用：", torch.cuda.is_available())
+    print("可見 GPU 數量：", torch.cuda.device_count())
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     guidelines = load_guidelines(GUIDELINES_PATH)
 
-    reranker = FlagReranker('BAAI/bge-reranker-v2-m3', use_fp16=True)
+    reranker = FlagReranker('BAAI/bge-reranker-v2-m3', use_fp16=True, device=device)
 
     chroma_paths = get_chroma_dirs(BASE_CHROMA_PATH)
     if not chroma_paths:
@@ -58,9 +61,11 @@ def main():
 
         print(f"\n--- 開始處理 {company_name} 的 ChromaDB ---")
 
-        embedding = OpenAIEmbeddings()
+        embeddings = HuggingFaceEmbeddings(
+            model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}  # 指定運行裝置
+        )
         try:
-            db = Chroma(persist_directory=chroma_dir, embedding_function=embedding)
+            db = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
             print(f"[INFO] 成功載入 {company_name} 的 ChromaDB。")
         except Exception as e:
             print(f"[ERROR] 載入 {company_name} 的 ChromaDB 失敗：{e}")
@@ -82,13 +87,17 @@ def main():
 
             for rank, ((doc, dist), sim) in enumerate(reranked, start=1):
                 output_records.append({
+                    'Company': company_name,
                     'Label': label,
                     'Definition': definition,
                     '報告書頁數': doc.metadata.get('page', 'N/A'),
                     'Chunk ID': doc.metadata.get('chunk_id', 'N/A'),
                     'Chunk Text': doc.page_content.replace('\n', ' '),
                     '是否真的有揭露此標準?(Y/N)': "",   
-                    'reasoning': ""                      
+                    'reasoning': "",
+                    'RerankScore': float(sim),
+                    'InitScoreOrDist': float(dist),
+                    'Rank': rank                
                 })
 
         out_df = pd.DataFrame(output_records)
