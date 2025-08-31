@@ -12,22 +12,18 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from prompt.V1 import TCFD_LLM_ANSWER_PROMPT
 
-#  PROMPT
-from prompt.V1 import PROMPT
-
-
-INPUT_DIR = "data/handroll_query_result"
+INPUT_DIR = "data/TNFD_query_result"
 INPUT_PATTERN = "*_output_chunks.csv"   
-POS_EXAMPLE_SOURCE = "data/2023_query_result/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
+POS_EXAMPLE_SOURCE = "data/2023_query_result/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
-GUIDELINES_USE_DEFINITION_AS_LABEL = True  # PROMPT 的 {label} 位置是否顯示 Definition（通常 True）
+GUIDELINES_USE_DEFINITION_AS_LABEL = True
 
 MODEL_NAME = "gpt-4o-mini"
 MAX_WORKERS = 10              
 SKIP_IF_OUTPUT_EXISTS = True  
 
-# ===== 欄位名稱常數 =====
 COL_CHUNK = "Chunk Text"
 COL_LABEL = "Label"
 COL_DEF   = "Definition"
@@ -35,21 +31,20 @@ COL_PE1   = "Positive Example1"
 COL_PE2   = "Positive Example2"
 COL_REASON = "reasoning"
 COL_YN     = "是否真的有揭露此標準?(Y/N)"
+COL_CONFIDENCE = "confidence"
 COL_COMPANY= "Company"
 COL_RANK   = "Rank"
-
-# ===== 輸出檔名樣式（對齊你的彙整碼 PATTERN） =====
+OUTPUT_SUBDIR = "tnfd_llm_answer"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
-# ===== Pydantic 資料模型 =====
 class Result(BaseModel):
     reasoning: Optional[str] = None
     is_disclosed: Optional[str] = None
+    confidence: Optional[float] = None
 
 class ResultList(BaseModel):
     result: List[Result]
 
-# ===== 工具：從富邦檔萃取 Label→(PE1,PE2) 對應 =====
 def first_nonempty(series: pd.Series) -> str:
     for x in series:
         s = str(x) if x is not None else ""
@@ -62,10 +57,8 @@ def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
     if ext in [".xlsx", ".xls"]:
         df = pd.read_excel(path, dtype=str)
     else:
-        # 預設當 CSV
         df = pd.read_csv(path, dtype=str)
 
-    # 正常應包含 Label, Positive Example1, Positive Example2
     needed = {COL_LABEL, COL_PE1, COL_PE2}
     missing = needed - set(df.columns)
     if missing:
@@ -74,7 +67,6 @@ def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
         )
 
     df = df[[COL_LABEL, COL_PE1, COL_PE2]].fillna("")
-    # 以 Label 群組，取每欄第一個非空值
     agg = (
         df.groupby(COL_LABEL, as_index=True)
           .agg({COL_PE1: first_nonempty, COL_PE2: first_nonempty})
@@ -85,33 +77,33 @@ def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
         pe_map[str(label)] = (str(row[COL_PE1]) or "", str(row[COL_PE2]) or "")
     return pe_map
 
-# ===== 組合提示 =====
 def get_prompt(chunk: str, standard_text_for_label: str, pos1: str, pos2: str) -> str:
-    return PROMPT.format(
+    return TCFD_LLM_ANSWER_PROMPT.format(
         chunk=chunk,
         label=standard_text_for_label,  # PROMPT 的 {label} 這裡放 Definition（或 Label 代碼，依你的配置）
-        positive_example1=pos1,
-        positive_example2=pos2,
+        # positive_example1=pos1,
+        # positive_example2=pos2,
     )
 
-# ===== 建鏈（只建一次） =====
 def build_chain(api_key: str):
     llm = ChatOpenAI(model=MODEL_NAME, api_key=api_key, temperature=0)
     parser = PydanticOutputParser(pydantic_object=ResultList)
     prompt_template = ChatPromptTemplate.from_messages([
-        ("system", "你是一位專業的 TCFD 揭露標準判讀專家。請嚴格依 JSON 結構輸出。"),
+        ("system", "你是一位專業的 TCFD 揭露標準判讀專家。"),
         ("human", "{input}"),
     ])
     return prompt_template | llm | parser
 
-# ===== 呼叫鏈（退避重試） =====
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=30))
+def _return_default(retry_state):
+    print(retry_state)
+    return {"result": [{"reasoning": "", "is_disclosed": "", "confidence": 0.0}]}
+
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(min=1, max=30), retry_error_callback=_return_default)
 def call_chain(chain, chunk: str, standard_text_for_label: str, pos1: str, pos2: str) -> dict:
     prompt = get_prompt(chunk, standard_text_for_label, pos1, pos2)
     resp = chain.invoke({"input": prompt})
     return resp.model_dump()
 
-# ===== 由檔名推公司，決定輸出路徑 =====
 def infer_company_and_output_path(input_path: str) -> Tuple[str, str]:
     base = os.path.basename(input_path)
     company = base.split("_output_chunks")[0]
@@ -122,12 +114,15 @@ def infer_company_and_output_path(input_path: str) -> Tuple[str, str]:
         out_base = f"{name_no_ext}_with_CoT_v1_few_shot.csv"
     if not out_base.lower().endswith(".csv"):
         out_base += ".csv"
-    out_path = os.path.join(os.path.dirname(input_path), out_base)
+
+    original_dir = os.path.dirname(input_path)
+    output_dir = os.path.join(original_dir, OUTPUT_SUBDIR)
+    os.makedirs(output_dir, exist_ok=True)
+    out_path = os.path.join(output_dir, out_base)
+
     return company, out_path
 
-# ===== 把富邦正例映射灌回各公司 df =====
 def attach_positive_examples(df: pd.DataFrame, pe_map: Dict[str, Tuple[str, str]]) -> pd.DataFrame:
-    # 確保欄位存在
     if COL_PE1 not in df.columns:
         df[COL_PE1] = ""
     if COL_PE2 not in df.columns:
@@ -135,7 +130,6 @@ def attach_positive_examples(df: pd.DataFrame, pe_map: Dict[str, Tuple[str, str]
     df[COL_PE1] = df[COL_PE1].fillna("")
     df[COL_PE2] = df[COL_PE2].fillna("")
 
-    # 只把空白的補上（若原本就有，尊重原值）
     if COL_LABEL in df.columns:
         mask1 = df[COL_PE1].eq("")
         mask2 = df[COL_PE2].eq("")
@@ -143,7 +137,6 @@ def attach_positive_examples(df: pd.DataFrame, pe_map: Dict[str, Tuple[str, str]
         df.loc[mask2, COL_PE2] = df.loc[mask2, COL_LABEL].map(lambda k: pe_map.get(k, ("",""))[1]).fillna("")
     return df
 
-# ===== 補齊 Company / Rank / reasoning / YN =====
 def ensure_util_columns(df: pd.DataFrame, company: str) -> pd.DataFrame:
     if COL_COMPANY not in df.columns:
         df[COL_COMPANY] = company
@@ -155,7 +148,6 @@ def ensure_util_columns(df: pd.DataFrame, company: str) -> pd.DataFrame:
     if COL_YN not in df.columns:
         df[COL_YN] = ""
 
-    # 產 Rank：每個 Label 內依出現順序 1..N（你的查詢本來就是 Top-N 依序 append，這樣就等同於 Rank）
     if COL_RANK not in df.columns:
         if COL_LABEL in df.columns:
             df[COL_RANK] = df.groupby(COL_LABEL).cumcount() + 1
@@ -163,12 +155,10 @@ def ensure_util_columns(df: pd.DataFrame, company: str) -> pd.DataFrame:
             df[COL_RANK] = range(1, len(df) + 1)
     return df
 
-# ===== 單檔處理 =====
 def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
     try:
         df = pd.read_csv(path, dtype=str).fillna("")
     except Exception:
-        # 若不是 CSV，嘗試 xlsx（理論上查詢輸出檔是 CSV）
         try:
             df = pd.read_excel(path, dtype=str).fillna("")
         except Exception as e:
@@ -180,15 +170,12 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
         print(f"[SKIP] 已存在輸出：{os.path.basename(out_path)}")
         return
 
-    # 灌正例 + 補欄位
     df = attach_positive_examples(df, pe_map)
     df = ensure_util_columns(df, company)
 
-    # 準備任務：允許正例為空；只要 chunk 與標準文字存在就跑
     tasks = []
     for idx, row in df.iterrows():
         chunk = str(row.get(COL_CHUNK, "") or "")
-        # PROMPT 的 {label} 內容：預設用 Definition，若空再用 Label
         label_text_for_prompt = (
             str(row.get(COL_DEF, "") or "").strip()
             if GUIDELINES_USE_DEFINITION_AS_LABEL else ""
@@ -218,36 +205,36 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
                     reasoning = (first.get("reasoning") or "").strip()
                     yn = (first.get("is_disclosed") or "").strip().upper()
                     yn = "Y" if yn == "Y" else "N"
-                    results.append((idx, reasoning, yn, None))
+                    confidence = first.get("confidence", 0.0)
+                    results.append((idx, reasoning, yn, confidence, None))
                 else:
-                    results.append((idx, "", "N", "Empty parser result"))
+                    results.append((idx, "", "N", 0.0, "Empty parser result"))
             except Exception as e:
-                results.append((idx, "", "N", f"API error: {e}"))
+                results.append((idx, "", "N", 0.0, f"API error: {e}"))
 
-    for idx, reasoning, yn, err in results:
+    for idx, reasoning, yn, confidence, err in results:
         df.at[idx, COL_REASON] = reasoning if not err else err
         df.at[idx, COL_YN] = yn
+        try:
+            df.at[idx, COL_CONFIDENCE] = float(confidence)
+        except Exception:
+            df.at[idx, COL_CONFIDENCE] = 0.0
 
-    # 輸出（UTF-8-SIG 方便 Excel）
     df.to_csv(out_path, index=False, encoding="utf-8-sig")
     print(f"[SUCCESS] 輸出：{out_path}")
 
-# ===== 主程式 =====
 def main():
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("請在 .env 設定 OPENAI_API_KEY")
 
-    # 從「富邦」檔萃取正例映射
     pe_map = load_pos_examples_from_verified(POS_EXAMPLE_SOURCE)
     if not pe_map:
         print("[WARN] 正例映射為空，將在無 few-shot 的情況下判讀。")
 
-    # 建立 LLM 鏈
     chain = build_chain(api_key)
 
-    # 掃描所有原始查詢輸出檔
     paths = sorted(glob(os.path.join(INPUT_DIR, INPUT_PATTERN)))
     if not paths:
         print(f"[ERROR] 在 {INPUT_DIR} 找不到 {INPUT_PATTERN}")

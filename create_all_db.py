@@ -6,13 +6,16 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from tqdm.auto import tqdm
+from langchain_community.embeddings import HuggingFaceEmbeddings
+import torch
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_report"
-PDF_ROOT = "data/handroll"
+BASE_CHROMA_PATH = "chroma_report_TNFD"
+PDF_ROOT = "data/TNFD報告書"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
+EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-0.6B"
 
 
 def find_all_pdfs(root_dir: str):
@@ -24,7 +27,7 @@ def find_all_pdfs(root_dir: str):
     return sorted(pdfs)
 
 
-def process_pdf(pdf_path: str):
+def process_pdf(pdf_path: str, embeddings):
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
     chroma_path = os.path.join(BASE_CHROMA_PATH, pdf_name)
 
@@ -57,7 +60,7 @@ def process_pdf(pdf_path: str):
     print(f"[INFO] Creating embeddings and storing in ChromaDB...")
     db = Chroma.from_documents(
         documents=documents,
-        embedding=OpenAIEmbeddings(chunk_size=20),
+        embedding=embeddings,
         persist_directory=chroma_path,
         **{"collection_metadata": {"hnsw:space": EMBEDDING_SPACE}},
     )
@@ -66,15 +69,23 @@ def process_pdf(pdf_path: str):
 
 
 def main():
-    load_dotenv()  # 只需 .env 有 OPENAI_API_KEY
+    load_dotenv()
     os.makedirs(BASE_CHROMA_PATH, exist_ok=True)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"[INFO] Using device: {device}")
+
+    print(f"[INFO] Initializing embedding model: {EMBEDDING_MODEL_NAME}...")
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}
+    )
+
     pdf_paths = find_all_pdfs(PDF_ROOT)
     if not pdf_paths:
         print(f"[ERROR] 在 {PDF_ROOT} 找不到任何 PDF。")
         return
     print(f"[INFO] 共找到 {len(pdf_paths)} 份 PDF。")
     for p in tqdm(pdf_paths, desc="建立 ChromaDB"):
-        process_pdf(p)
+        process_pdf(p, embeddings)
 
 
 if __name__ == "__main__":
