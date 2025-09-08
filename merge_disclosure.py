@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import os
 
 def process_report_file(file_path, report_type):
     """
@@ -23,8 +24,9 @@ def process_report_file(file_path, report_type):
         # 提取公司簡稱 (通常是第二個部分)
         df['Company_Name'] = df['Company'].str.split('_').str[1]
         
-        # 使用正規表達式提取四位數的年份，這比用底線分割更穩定
-        df['Year'] = df['Company'].str.extract(r'(\d{4})')
+        # --- BUG 修正 ---
+        # 使用更精確的正規表達式 (20\d{2}) 來提取年份，避免抓到4位數的公司代碼
+        df['Year'] = df['Company'].str.extract(r'(20\d{2})')
         
         # 確保 Disclosure_Ratio 是數值型態
         df['Disclosure_Ratio'] = pd.to_numeric(df['Disclosure_Ratio'], errors='coerce')
@@ -47,8 +49,7 @@ def process_report_file(file_path, report_type):
         print(f"處理檔案 {file_path} 時發生錯誤: {e}")
         return None
 
-# --- 檔案路徑設定 ---
-# 請確保這三個 CSV 檔和你的 Python 程式放在同一個資料夾裡
+# --- 檔案路徑設定 (已更新為您提供的路徑) ---
 tcfd_file = 'data/report_disclosure_rate/company_disclosure_ratio.csv'
 tnfd_file = 'data/report_disclosure_rate/TNFD_報告書揭露比例.csv'
 sustainability_file = 'data/report_disclosure_rate/永續報告書(50家)_揭露比例.csv'
@@ -68,7 +69,6 @@ if tcfd_df is not None and tnfd_df is not None and sustainability_df is not None
     ]).drop_duplicates(subset=['Company_Code'])
 
     # 第一次合併：TCFD & TNFD
-    # 使用 'outer' 合併，確保任何一份報告有的公司和年份都會被保留
     merged_df = pd.merge(
         tcfd_df.drop(columns=['Company_Name']),
         tnfd_df.drop(columns=['Company_Name']),
@@ -87,46 +87,69 @@ if tcfd_df is not None and tnfd_df is not None and sustainability_df is not None
     # 將公司名稱加回合併後的表格
     final_df = pd.merge(final_df, company_map, on='Company_Code', how='left')
 
-    # --- 計算平均揭露比例 ---
+    # --- 計算摘要統計資料 ---
+    # 平均值
     avg_tcfd = final_df['TCFD_Ratio'].mean()
     avg_tnfd = final_df['TNFD_Ratio'].mean()
     avg_sustainability = final_df['永續報告書_Ratio'].mean()
     
-    # 建立一個新的 DataFrame 來存放平均值
-    average_row = pd.DataFrame([{
-        'Company_Name': '平均揭露比例',
-        'TCFD_Ratio': avg_tcfd,
-        'TNFD_Ratio': avg_tnfd,
-        '永續報告書_Ratio': avg_sustainability
-    }])
-    
-    # 將平均值列加到最終表格的底部
-    final_df_with_avg = pd.concat([final_df, average_row], ignore_index=True)
+    # 中位數
+    median_tcfd = final_df['TCFD_Ratio'].median()
+    median_tnfd = final_df['TNFD_Ratio'].median()
+    median_sustainability = final_df['永續報告書_Ratio'].median()
+
+    # 報告數量
+    count_tcfd = final_df['TCFD_Ratio'].count()
+    count_tnfd = final_df['TNFD_Ratio'].count()
+    count_sustainability = final_df['永續報告書_Ratio'].count()
+
+    # 建立摘要統計的 DataFrame
+    summary_df = pd.DataFrame([
+        {'Company_Name': '平均揭露比例', 'TCFD_Ratio': avg_tcfd, 'TNFD_Ratio': avg_tnfd, '永續報告書_Ratio': avg_sustainability},
+        {'Company_Name': '揭露比例中位數', 'TCFD_Ratio': median_tcfd, 'TNFD_Ratio': median_tnfd, '永續報告書_Ratio': median_sustainability},
+        {'Company_Name': '報告書數量', 'TCFD_Ratio': count_tcfd, 'TNFD_Ratio': count_tnfd, '永續報告書_Ratio': count_sustainability}
+    ])
 
     # --- 格式化與排序 ---
     # 重新排列欄位順序，讓報告更清晰
     column_order = ['Company_Code', 'Company_Name', 'Year', 'TCFD_Ratio', 'TNFD_Ratio', '永續報告書_Ratio']
-    final_df_with_avg = final_df_with_avg[column_order]
     
-    # 依公司代碼和年份排序
-    # 我們將平均值列暫時排除排序，完成後再加回去
-    sorted_df = final_df_with_avg.iloc[:-1].sort_values(by=['Company_Code', 'Year'])
-    final_sorted_df = pd.concat([sorted_df, final_df_with_avg.iloc[-1:]], ignore_index=True)
-    
-    # 將揭露比例轉換為百分比格式，並處理空值
+    # 排序主要資料
+    main_data_df = final_df.sort_values(by=['Company_Code', 'Year'])
+    main_data_df = main_data_df[column_order]
+
+    # 格式化主要資料的揭露比例為百分比
     ratio_cols = ['TCFD_Ratio', 'TNFD_Ratio', '永續報告書_Ratio']
     for col in ratio_cols:
-        # 使用 .loc 避免 SettingWithCopyWarning
-        final_sorted_df.loc[:, col] = final_sorted_df[col].apply(
+        main_data_df.loc[:, col] = main_data_df[col].apply(
             lambda x: f'{x*100:.2f}%' if pd.notna(x) else ''
         )
 
-    # --- 輸出檔案 ---
-    output_file = 'data/report_disclosure_rate/綜合報告書揭露比例_合併版.csv'
-    # 使用 'utf-8-sig' 編碼，確保 Excel 打開時中文不會亂碼
-    final_sorted_df.to_csv(output_file, index=False, encoding='utf-8-sig')
+    # 格式化摘要統計資料
+    # 對平均值和中位數列應用百分比格式
+    for col in ratio_cols:
+        summary_df.loc[0:1, col] = summary_df.loc[0:1, col].apply(
+            lambda x: f'{x*100:.2f}%' if pd.notna(x) else ''
+        )
+    # 將數量列轉為整數
+    summary_df.loc[2, ratio_cols] = summary_df.loc[2, ratio_cols].astype(int)
+
+    # 合併主要資料與摘要統計資料
+    final_combined_df = pd.concat([main_data_df, summary_df], ignore_index=True)
+
+    # --- 輸出檔案 (已更新為您提供的路徑) ---
+    output_file = 'data/report_disclosure_rate/綜合報告書揭露比例_含統計.csv'
     
-    print(f"成功！合併後的檔案已儲存為: {output_file}")
+    # 檢查輸出目錄是否存在，如果不存在就建立它
+    output_dir = os.path.dirname(output_file)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # 使用 'utf-8-sig' 編碼，確保 Excel 打開時中文不會亂碼
+    final_combined_df.to_csv(output_file, index=False, encoding='utf-8-sig')
+    
+    print(f"成功！包含摘要統計的檔案已儲存為: {output_file}")
 
 else:
     print("因為有檔案讀取失敗，無法進行合併。")
+
