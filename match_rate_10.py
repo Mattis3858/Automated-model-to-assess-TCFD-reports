@@ -8,20 +8,21 @@ def filter_companies_and_export():
     
     # 設定檔案路徑
     input_path = 'data/report_disclosure_rate/模型與人工判讀相異驗證.xlsx'
-    output_path = 'data/report_disclosure_rate/篩選後_10家公司報告書.xlsx'
+    output_path = 'data/report_disclosure_rate/篩選後_6家公司報告書.xlsx'
     
     # 定義要保留的10家公司
     target_companies = [
-        '2893_新光銀行_2021_TCFD_專章',
+        
         '5841_中信銀行_2022_TCFD_報告書',
-        '5863_瑞興銀行_2022_TCFD_報告書',
-        '5868_台灣金控_2021_TCFD_專章',
-        '2880_華南金控_2021_TCFD_專章',
+        '2812_台中銀行_2023_TCFD_報告書',
+        '2836_高雄銀行_2022_TCFD_報告書',
         '5870_花旗銀行_2023_TCFD_報告書',
-        '2897_王道銀行_2021_TCFD_專章',
-        '6031_連線銀行_2022_TCFD_報告書',
-        '5835_國泰銀行_2022_TCFD_報告書',
-        '2845_遠東商銀_2021_TCFD_專章'
+        '2801_彰化銀行_2021_TCFD_報告書',
+        '2890_永豐金控_2021_TCFD_專章'
+        # '2897_王道銀行_2021_TCFD_專章',
+        # '6031_連線銀行_2022_TCFD_報告書',
+        # '5835_國泰銀行_2022_TCFD_報告書',
+        # '2845_遠東商銀_2021_TCFD_專章'
     ]
     
     try:
