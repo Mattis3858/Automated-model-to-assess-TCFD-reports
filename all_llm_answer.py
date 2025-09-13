@@ -15,35 +15,38 @@ from langchain_core.prompts import ChatPromptTemplate
 from prompt.V1 import TCFD_LLM_ANSWER_PROMPT
 
 INPUT_DIR = "data/TNFD_query_result"
-INPUT_PATTERN = "*_output_chunks.csv"   
+INPUT_PATTERN = "*_output_chunks.csv"
 POS_EXAMPLE_SOURCE = "data/2023_query_result/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
 GUIDELINES_USE_DEFINITION_AS_LABEL = True
 
 MODEL_NAME = "gpt-4o-mini"
-MAX_WORKERS = 10              
-SKIP_IF_OUTPUT_EXISTS = True  
+MAX_WORKERS = 10
+SKIP_IF_OUTPUT_EXISTS = True
 
 COL_CHUNK = "Chunk Text"
 COL_LABEL = "Label"
-COL_DEF   = "Definition"
-COL_PE1   = "Positive Example1"
-COL_PE2   = "Positive Example2"
+COL_DEF = "Definition"
+COL_PE1 = "Positive Example1"
+COL_PE2 = "Positive Example2"
 COL_REASON = "reasoning"
-COL_YN     = "是否真的有揭露此標準?(Y/N)"
+COL_YN = "是否真的有揭露此標準?(Y/N)"
 COL_CONFIDENCE = "confidence"
-COL_COMPANY= "Company"
-COL_RANK   = "Rank"
+COL_COMPANY = "Company"
+COL_RANK = "Rank"
 OUTPUT_SUBDIR = "tnfd_llm_answer"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
+
 
 class Result(BaseModel):
     reasoning: Optional[str] = None
     is_disclosed: Optional[str] = None
     confidence: Optional[float] = None
 
+
 class ResultList(BaseModel):
     result: List[Result]
+
 
 def first_nonempty(series: pd.Series) -> str:
     for x in series:
@@ -51,6 +54,7 @@ def first_nonempty(series: pd.Series) -> str:
         if s.strip():
             return s
     return ""
+
 
 def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
     ext = os.path.splitext(path)[1].lower()
@@ -67,15 +71,15 @@ def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
         )
 
     df = df[[COL_LABEL, COL_PE1, COL_PE2]].fillna("")
-    agg = (
-        df.groupby(COL_LABEL, as_index=True)
-          .agg({COL_PE1: first_nonempty, COL_PE2: first_nonempty})
+    agg = df.groupby(COL_LABEL, as_index=True).agg(
+        {COL_PE1: first_nonempty, COL_PE2: first_nonempty}
     )
     # 轉為 dict
     pe_map = {}
     for label, row in agg.iterrows():
         pe_map[str(label)] = (str(row[COL_PE1]) or "", str(row[COL_PE2]) or "")
     return pe_map
+
 
 def get_prompt(chunk: str, standard_text_for_label: str, pos1: str, pos2: str) -> str:
     return TCFD_LLM_ANSWER_PROMPT.format(
@@ -85,24 +89,36 @@ def get_prompt(chunk: str, standard_text_for_label: str, pos1: str, pos2: str) -
         # positive_example2=pos2,
     )
 
+
 def build_chain(api_key: str):
     llm = ChatOpenAI(model=MODEL_NAME, api_key=api_key, temperature=0)
     parser = PydanticOutputParser(pydantic_object=ResultList)
-    prompt_template = ChatPromptTemplate.from_messages([
-        ("system", "你是一位專業的 TCFD 揭露標準判讀專家。"),
-        ("human", "{input}"),
-    ])
+    prompt_template = ChatPromptTemplate.from_messages(
+        [
+            ("system", "你是一位專業的 TCFD 揭露標準判讀專家。"),
+            ("human", "{input}"),
+        ]
+    )
     return prompt_template | llm | parser
+
 
 def _return_default(retry_state):
     print(retry_state)
     return {"result": [{"reasoning": "", "is_disclosed": "", "confidence": 0.0}]}
 
-@retry(stop=stop_after_attempt(5), wait=wait_exponential(min=1, max=30), retry_error_callback=_return_default)
-def call_chain(chain, chunk: str, standard_text_for_label: str, pos1: str, pos2: str) -> dict:
+
+@retry(
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(min=1, max=30),
+    retry_error_callback=_return_default,
+)
+def call_chain(
+    chain, chunk: str, standard_text_for_label: str, pos1: str, pos2: str
+) -> dict:
     prompt = get_prompt(chunk, standard_text_for_label, pos1, pos2)
     resp = chain.invoke({"input": prompt})
     return resp.model_dump()
+
 
 def infer_company_and_output_path(input_path: str) -> Tuple[str, str]:
     base = os.path.basename(input_path)
@@ -122,7 +138,10 @@ def infer_company_and_output_path(input_path: str) -> Tuple[str, str]:
 
     return company, out_path
 
-def attach_positive_examples(df: pd.DataFrame, pe_map: Dict[str, Tuple[str, str]]) -> pd.DataFrame:
+
+def attach_positive_examples(
+    df: pd.DataFrame, pe_map: Dict[str, Tuple[str, str]]
+) -> pd.DataFrame:
     if COL_PE1 not in df.columns:
         df[COL_PE1] = ""
     if COL_PE2 not in df.columns:
@@ -133,9 +152,18 @@ def attach_positive_examples(df: pd.DataFrame, pe_map: Dict[str, Tuple[str, str]
     if COL_LABEL in df.columns:
         mask1 = df[COL_PE1].eq("")
         mask2 = df[COL_PE2].eq("")
-        df.loc[mask1, COL_PE1] = df.loc[mask1, COL_LABEL].map(lambda k: pe_map.get(k, ("",""))[0]).fillna("")
-        df.loc[mask2, COL_PE2] = df.loc[mask2, COL_LABEL].map(lambda k: pe_map.get(k, ("",""))[1]).fillna("")
+        df.loc[mask1, COL_PE1] = (
+            df.loc[mask1, COL_LABEL]
+            .map(lambda k: pe_map.get(k, ("", ""))[0])
+            .fillna("")
+        )
+        df.loc[mask2, COL_PE2] = (
+            df.loc[mask2, COL_LABEL]
+            .map(lambda k: pe_map.get(k, ("", ""))[1])
+            .fillna("")
+        )
     return df
+
 
 def ensure_util_columns(df: pd.DataFrame, company: str) -> pd.DataFrame:
     if COL_COMPANY not in df.columns:
@@ -154,6 +182,7 @@ def ensure_util_columns(df: pd.DataFrame, company: str) -> pd.DataFrame:
         else:
             df[COL_RANK] = range(1, len(df) + 1)
     return df
+
 
 def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
     try:
@@ -178,7 +207,8 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
         chunk = str(row.get(COL_CHUNK, "") or "")
         label_text_for_prompt = (
             str(row.get(COL_DEF, "") or "").strip()
-            if GUIDELINES_USE_DEFINITION_AS_LABEL else ""
+            if GUIDELINES_USE_DEFINITION_AS_LABEL
+            else ""
         )
         if not label_text_for_prompt:
             label_text_for_prompt = str(row.get(COL_LABEL, "") or "").strip()
@@ -196,7 +226,9 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
             ex.submit(call_chain, chain, chunk, label_text_for_prompt, pos1, pos2): idx
             for (idx, chunk, label_text_for_prompt, pos1, pos2) in tasks
         }
-        for fut in tqdm(as_completed(futures), total=len(futures), desc=os.path.basename(path)):
+        for fut in tqdm(
+            as_completed(futures), total=len(futures), desc=os.path.basename(path)
+        ):
             idx = futures[fut]
             try:
                 data = fut.result()
@@ -223,6 +255,7 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
     df.to_csv(out_path, index=False, encoding="utf-8-sig")
     print(f"[SUCCESS] 輸出：{out_path}")
 
+
 def main():
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
@@ -243,6 +276,7 @@ def main():
     print(f"[INFO] 共找到 {len(paths)} 個輸入檔")
     for p in paths:
         process_one_file(p, chain, pe_map)
+
 
 if __name__ == "__main__":
     main()
