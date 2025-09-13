@@ -34,7 +34,7 @@ COL_YN = "是否真的有揭露此標準?(Y/N)"
 COL_CONFIDENCE = "confidence"
 COL_COMPANY = "Company"
 COL_RANK = "Rank"
-OUTPUT_SUBDIR = "tnfd_llm_answer"
+OUTPUT_SUBDIR = "tnfd_llm_answer_second_invocation"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
 
@@ -117,8 +117,25 @@ def call_chain(
 ) -> dict:
     prompt = get_prompt(chunk, standard_text_for_label, pos1, pos2)
     resp = chain.invoke({"input": prompt})
-    return resp.model_dump()
+    result = resp.model_dump()
+    print(result)
+    if result.get("result")[0].get("confidence") < 0.8:
+        second_chain  =  second_invocation_chain(api_key=os.getenv("OPENAI_API_KEY"))
+        response = second_chain .invoke({"input": prompt})
+        result = response.model_dump()
+        print("\nSecond:", result)
+    return result
 
+def second_invocation_chain(api_key: str):
+    llm = ChatOpenAI(model="gpt-4.1-mini", api_key=api_key, temperature=0)
+    parser = PydanticOutputParser(pydantic_object=ResultList)
+    prompt_template = ChatPromptTemplate.from_messages(
+        [
+            ("system", "你是一位專業的 TCFD 揭露標準判讀專家。"),
+            ("human", "{input}"),
+        ]
+    )
+    return prompt_template | llm | parser
 
 def infer_company_and_output_path(input_path: str) -> Tuple[str, str]:
     base = os.path.basename(input_path)
