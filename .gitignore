@@ -1,6 +1,8 @@
 /__pycache__
 /chroma
 /chroma_report
+/chroma_tnfd_report
+/chroma_esg_report
 .DS_Store
 /venv
 .env
