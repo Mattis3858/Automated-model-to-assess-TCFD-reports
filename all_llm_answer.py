@@ -10,11 +10,12 @@ from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from langchain_openai import ChatOpenAI
+from langchain_google_vertexai import ChatVertexAI
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from prompt.V1 import TCFD_LLM_ANSWER_PROMPT
 
-INPUT_DIR = "data/TNFD_query_result"
+INPUT_DIR = "data/TCFD_query_result_for_second_invocation"
 INPUT_PATTERN = "*_output_chunks.csv"
 POS_EXAMPLE_SOURCE = "data/2023_query_result/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
@@ -34,7 +35,7 @@ COL_YN = "是否真的有揭露此標準?(Y/N)"
 COL_CONFIDENCE = "confidence"
 COL_COMPANY = "Company"
 COL_RANK = "Rank"
-OUTPUT_SUBDIR = "tnfd_llm_answer_second_invocation"
+OUTPUT_SUBDIR = "tcfd_llm_answer_second_invocation"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
 
@@ -118,16 +119,18 @@ def call_chain(
     prompt = get_prompt(chunk, standard_text_for_label, pos1, pos2)
     resp = chain.invoke({"input": prompt})
     result = resp.model_dump()
-    print(result)
+    # print(result)
     if result.get("result")[0].get("confidence") < 0.8:
-        second_chain  =  second_invocation_chain(api_key=os.getenv("OPENAI_API_KEY"))
-        response = second_chain .invoke({"input": prompt})
+        second_chain = second_invocation_chain(api_key=os.getenv("OPENAI_API_KEY"))
+        response = second_chain.invoke({"input": prompt})
         result = response.model_dump()
-        print("\nSecond:", result)
+        # print("\nSecond:", result)
     return result
+
 
 def second_invocation_chain(api_key: str):
     llm = ChatOpenAI(model="gpt-4.1-mini", api_key=api_key, temperature=0)
+    # llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0)
     parser = PydanticOutputParser(pydantic_object=ResultList)
     prompt_template = ChatPromptTemplate.from_messages(
         [
@@ -136,6 +139,7 @@ def second_invocation_chain(api_key: str):
         ]
     )
     return prompt_template | llm | parser
+
 
 def infer_company_and_output_path(input_path: str) -> Tuple[str, str]:
     base = os.path.basename(input_path)
