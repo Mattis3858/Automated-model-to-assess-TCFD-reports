@@ -10,8 +10,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import torch
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_report_TNFD"
-PDF_ROOT = "data/TNFD報告書"
+BASE_CHROMA_PATH = "chroma_report_年報"
+PDF_ROOT = "data/先行者金控年報"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
@@ -74,10 +74,11 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[INFO] Using device: {device}")
 
-    print(f"[INFO] Initializing embedding model: {EMBEDDING_MODEL_NAME}...")
-    embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}
-    )
+    # print(f"[INFO] Initializing embedding model: {EMBEDDING_MODEL_NAME}...")
+    # embeddings = HuggingFaceEmbeddings(
+    #     model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}
+    # )
+    embeddings = OpenAIEmbeddings(chunk_size=20)
 
     pdf_paths = find_all_pdfs(PDF_ROOT)
     if not pdf_paths:
