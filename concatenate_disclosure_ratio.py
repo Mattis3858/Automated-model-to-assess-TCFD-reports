@@ -3,7 +3,7 @@ import os
 
 file_list = [
     'data/report_disclosure_rate/TCFD_company_disclosure_ratio.csv',
-    'data/report_disclosure_rate/TNFD_報告書揭露比例.csv',
+    'data/report_disclosure_rate/TNFD_ompany_disclosure_ratio.csv',
     'data/report_disclosure_rateary/永續報告書_company_disclosure_ratio.csv',
     'data/report_disclosure_rate/年報_company_disclosure_ratio.csv'
 ]
