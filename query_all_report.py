@@ -28,8 +28,8 @@ def get_chroma_dirs(base_chroma_path: str):
 def main():
     load_dotenv()
     GUIDELINES_PATH = 'data/tcfd第四層揭露指引.xlsx'
-    BASE_CHROMA_PATH = 'chroma_report_年報'
-    OUTPUT_DIR = 'data/年報_query_result'
+    BASE_CHROMA_PATH = 'chroma_sustainability_report'
+    OUTPUT_DIR = 'data/sustainability_report_query_result'
 
     CANDIDATE_K = 50
     TOP_N = 5  

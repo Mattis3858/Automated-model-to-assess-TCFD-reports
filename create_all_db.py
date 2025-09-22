@@ -10,8 +10,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import torch
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_report_年報"
-PDF_ROOT = "data/先行者金控年報"
+BASE_CHROMA_PATH = "chroma_sustainability_report"
+PDF_ROOT = "data/sustainability_reports"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
