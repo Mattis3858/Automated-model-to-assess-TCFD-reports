@@ -2,10 +2,10 @@ import pandas as pd
 import os
 
 file_list = [
-    'data/TCFD_summary/tcfd_company_disclosure_ratio.csv',
-    'data/TNFD_summary/TNFD_報告書揭露比例.csv',
-    'data/sustainability_report_summary/永續報告書_company_disclosure_ratio.csv',
-    'data/年報_summary/年報_company_disclosure_ratio.csv'
+    'data/report_disclosure_rate/TCFD_company_disclosure_ratio.csv',
+    'data/report_disclosure_rate/TNFD_報告書揭露比例.csv',
+    'data/report_disclosure_rateary/永續報告書_company_disclosure_ratio.csv',
+    'data/report_disclosure_rate/年報_company_disclosure_ratio.csv'
 ]
 
 all_files_exist = True
