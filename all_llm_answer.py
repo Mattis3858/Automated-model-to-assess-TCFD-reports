@@ -10,14 +10,14 @@ from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from langchain_openai import ChatOpenAI
-from langchain_google_vertexai import ChatVertexAI
+# from langchain_google_vertexai import ChatVertexAI
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from prompt.V1 import TCFD_LLM_ANSWER_PROMPT
 
-INPUT_DIR = "data/TCFD_query_result_for_second_invocation"
+INPUT_DIR = "data/永續報告書retrieval0921"
 INPUT_PATTERN = "*_output_chunks.csv"
-POS_EXAMPLE_SOURCE = "data/2023_query_result/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
+POS_EXAMPLE_SOURCE = "data/2023_query_result/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
 GUIDELINES_USE_DEFINITION_AS_LABEL = True
 
@@ -35,7 +35,7 @@ COL_YN = "是否真的有揭露此標準?(Y/N)"
 COL_CONFIDENCE = "confidence"
 COL_COMPANY = "Company"
 COL_RANK = "Rank"
-OUTPUT_SUBDIR = "tcfd_llm_answer_second_invocation"
+OUTPUT_SUBDIR = "永續報告書0921_second_invocation"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
 
 

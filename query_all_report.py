@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 from tqdm.auto import tqdm
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from FlagEmbedding import FlagReranker
@@ -25,10 +26,10 @@ def get_chroma_dirs(base_chroma_path: str):
     return sorted(chroma_dirs)
 
 def main():
-
+    load_dotenv()
     GUIDELINES_PATH = 'data/tcfd第四層揭露指引.xlsx'
-    BASE_CHROMA_PATH = 'chroma_report_TNFD'
-    OUTPUT_DIR = 'data/TNFD_query_result'
+    BASE_CHROMA_PATH = 'chroma_report_永續報告書0921'
+    OUTPUT_DIR = 'data/永續報告書retrieval0921'
 
     CANDIDATE_K = 50
     TOP_N = 5  
@@ -61,9 +62,10 @@ def main():
 
         print(f"\n--- 開始處理 {company_name} 的 ChromaDB ---")
 
-        embeddings = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}  # 指定運行裝置
-        )
+        # embeddings = HuggingFaceEmbeddings(
+        #     model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}  # 指定運行裝置
+        # )
+        embeddings = OpenAIEmbeddings()
         try:
             db = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)
             print(f"[INFO] 成功載入 {company_name} 的 ChromaDB。")
