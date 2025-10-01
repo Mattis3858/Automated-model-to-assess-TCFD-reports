@@ -1,21 +1,25 @@
 import os
 import shutil
+
 from dotenv import load_dotenv
-from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.vectorstores import Chroma
-from tqdm.auto import tqdm
 from langchain_community.embeddings import HuggingFaceEmbeddings
+
+# from langchain_community.embeddings import OpenAIEmbeddings
+
+from tqdm.auto import tqdm
 import torch
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_sustainability_report"
-PDF_ROOT = "data/sustainability_reports"
+BASE_CHROMA_PATH = "chroma_TCFD_improved"
+PDF_ROOT = "data/TCFD_improved_pdfs"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"
 EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-0.6B"
+# EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-4B"
 
 
 def find_all_pdfs(root_dir: str):
@@ -54,10 +58,10 @@ def process_pdf(pdf_path: str, embeddings):
         print("-" * 50)
 
     if os.path.exists(chroma_path):
-        print(f"[INFO] Clearing existing ChromaDB at: {chroma_path}")
+        print("[INFO] Clearing existing ChromaDB at: {chroma_path}")
         shutil.rmtree(chroma_path)
 
-    print(f"[INFO] Creating embeddings and storing in ChromaDB...")
+    print("[INFO] Creating embeddings and storing in ChromaDB...")
     db = Chroma.from_documents(
         documents=documents,
         embedding=embeddings,
@@ -74,11 +78,11 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"[INFO] Using device: {device}")
 
-    # print(f"[INFO] Initializing embedding model: {EMBEDDING_MODEL_NAME}...")
-    # embeddings = HuggingFaceEmbeddings(
-    #     model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}
-    # )
-    embeddings = OpenAIEmbeddings(chunk_size=20)
+    print("[INFO] Initializing embedding model: {EMBEDDING_MODEL_NAME}...")
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL_NAME, model_kwargs={"device": device}
+    )
+    # embeddings = OpenAIEmbeddings(chunk_size=20)
 
     pdf_paths = find_all_pdfs(PDF_ROOT)
     if not pdf_paths:
