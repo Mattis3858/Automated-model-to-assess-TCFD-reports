@@ -6,17 +6,16 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-
 # from langchain_community.embeddings import OpenAIEmbeddings
 
 from tqdm.auto import tqdm
 import torch
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_TCFD_improved"
+BASE_CHROMA_PATH = "chroma_TCFD_improved_300"
 PDF_ROOT = "data/TCFD_improved_pdfs"
-CHUNK_SIZE = 500
-CHUNK_OVERLAP = 50
+CHUNK_SIZE = 300
+CHUNK_OVERLAP = 30
 EMBEDDING_SPACE = "cosine"
 EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-0.6B"
 # EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-4B"

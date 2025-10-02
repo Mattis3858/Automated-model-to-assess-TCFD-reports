@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 # 讀取資料
-df1 = pd.read_csv("data/handroll_summary/company_label_summary_final.csv")
+df1 = pd.read_csv("data/TCFD_report_improved_summary/company_label_summary.csv")
 df2 = pd.read_excel("data/銀行業_各組判讀結果.xlsx", sheet_name="Sheet1")
 
 # 從 Company 抽取銀行代號 (前綴數字) 和年份 (例如 2020)
