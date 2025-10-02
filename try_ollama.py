@@ -1,6 +1,9 @@
 from ollama import chat, Client
+import json
+import os
+from dotenv import load_dotenv
 
-OLLAMA_API_KEY = "3127934443274ff18693ee2187960c39.ECH-n725qHsWBsLDe8_6Cm5b"
+load_dotenv()
 
 PROMPT = """
 【角色設定】
@@ -22,10 +25,10 @@ PROMPT = """
 
 【任務資訊提供】
 - TCFD 揭露標準：
-「公司是否描述氣候相關風險與機會對財務狀況（例如資產、負債）的影響？」
+「公司是否揭露對「資本的取得」之財務規劃的影響？」
 
 - 報告書文本塊：
-「2021 氣候相關財務揭露建議 TCFD  報告書 17 TCFD 一般揭露項目 表5 氣候變遷對營運策略之影響 2. 組織在業務、策略和財務規劃上與氣候相關風險與機會的衝擊 彰銀盤點鑑別出之氣候相關風險與機會對公司各面向( 產品與服務、供應鏈和/ 或價值鏈、研發投資、 營運) 之影響( 表5)，詳細說明包括涵蓋氣候相關議題之公司政策與授信機制，並於氣候變遷對財務 規劃之影響（表6）詳述氣候相關風險與機會對彰銀財務規劃之具體影響。」
+「2021 氣候相關財務揭露建議 TCFD  報告書 圖目錄 表目錄 圖 1、企業社會責任組織架構  圖 2、風險管理組織架構 圖 3、RCP 升溫情境 圖 4、STEPS 情境 圖 5、彰銀氣候相關風險矩陣 圖 6、彰銀新興風險管理機制 圖 7、彰銀2017~2020 年溫室氣體排放量 表 1、氣候相關風險影響與對應之時間範圍 表 2、彰銀前五大氣候相關風險排序  表 3、前五大氣候風險財務影響說明  表 4、氣候相關機會與對應之影響 表 5、氣候變遷對營運策略之影響 表 6、氣候變遷對財務規劃之影響 表 7、彰銀採用之氣候情境 表 8、氣候變遷風險與傳統風險連結 表 9、前五大氣候風險之管理流程作為 表 10、氣候相關指標、目標、執行績效與管理措施 表 11、彰銀持續推動能資源改善措施 表 12、氣候相關指標、目標與執行績效 表 13、彰銀辨識之氣候相關信用風險 表 14、彰銀高碳排產業分類 7 8 9 9 12 24 26 10 12 13 15 17 19 20 22 23 25 27 28 29 31」
 
 【思考步驟（每步一句）】
 1. 萃取「TCFD 揭露標準」的關鍵要素。
@@ -62,10 +65,9 @@ PROMPT = """
     }
 ]}
 """
-
 client = Client(
     host="https://ollama.com",
-    headers={'Authorization': OLLAMA_API_KEY}
+    headers={'Authorization': os.getenv("OLLAMA_API_KEY")}
 )
 
 messages = [
@@ -76,5 +78,7 @@ messages = [
 ]
 
 response = client.chat('gpt-oss:20b', messages=messages, stream=False)
-
-print(response)
+json_from_model = response.message.content
+data = json.loads(json_from_model)
+result = json.dumps(data, indent=4, ensure_ascii=False)
+print(result)
