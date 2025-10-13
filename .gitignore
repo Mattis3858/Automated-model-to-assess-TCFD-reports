@@ -1,6 +1,9 @@
 /__pycache__
 /chroma
 /chroma_report
+/chroma_tnfd_report
+/chroma_esg_report
+/chroma_report_永續報告書0921
 .DS_Store
 /venv
 .env
@@ -17,3 +20,8 @@ chroma_query.log
 venv311
 chroma_report
 chroma_report_TNFD
+chroma_report_TCFD
+chroma_report_年報
+chroma_sustainability_report
+chroma_TCFD_improved
+chroma_TCFD_improved_300
