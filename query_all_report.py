@@ -13,10 +13,10 @@ import torch
 def load_guidelines(excel_path: str, sheet_name: str = "工作表2"):
     df = pd.read_excel(excel_path, sheet_name=sheet_name)
 
-    for col in ["Label", "Definition"]:
+    for col in ["Label", "Definition", "Point"]:
         if col not in df.columns:
             raise ValueError(f"指引檔缺少必要欄位：{col}")
-    return df[["Label", "Definition"]].to_dict(orient="records")
+    return df[["Label", "Definition", "Point"]].to_dict(orient="records")
 
 
 def get_chroma_dirs(base_chroma_path: str):
@@ -83,7 +83,7 @@ def main():
         output_records = []
 
         for item in tqdm(guidelines, desc=f"TCFD 指引進度 ({company_name})"):
-            label, definition = item["Label"], item["Definition"]
+            label, definition, point = item["Label"], item["Definition"], item["Point"]
 
             rough = db.similarity_search_with_score(definition, k=CANDIDATE_K)
             if not rough:
@@ -102,6 +102,7 @@ def main():
                         "Company": company_name,
                         "Label": label,
                         "Definition": definition,
+                        "Point": point,
                         "報告書頁數": doc.metadata.get("page", "N/A"),
                         "Chunk ID": doc.metadata.get("chunk_id", "N/A"),
                         "Chunk Text": doc.page_content.replace("\n", " "),
