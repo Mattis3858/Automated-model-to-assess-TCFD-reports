@@ -30,6 +30,7 @@ SKIP_IF_OUTPUT_EXISTS = True
 COL_CHUNK = "Chunk Text"
 COL_LABEL = "Label"
 COL_DEF = "Definition"
+COL_POINT = "Point"
 COL_PE1 = "Positive Example1"
 COL_PE2 = "Positive Example2"
 COL_REASON = "reasoning"
@@ -84,10 +85,11 @@ def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
     return pe_map
 
 
-def get_prompt(chunk: str, standard_text_for_label: str, pos1: str="", pos2: str="") -> str:
+def get_prompt(chunk: str, standard_text_for_label: str, point:str="", pos1: str="", pos2: str="") -> str:
     return TCFD_LLM_ANSWER_PROMPT.format(
         chunk=chunk,
         label=standard_text_for_label,  # PROMPT 的 {label} 這裡放 Definition（或 Label 代碼，依你的配置）
+        point = point
         # positive_example1=pos1,
         # positive_example2=pos2,
     )
@@ -116,9 +118,9 @@ def _return_default(retry_state):
     retry_error_callback=_return_default,
 )
 def call_chain(
-    chain:str="", chunk: str="", standard_text_for_label: str="", pos1: str="", pos2: str=""
+    chain:str="", chunk: str="", standard_text_for_label: str="",point:str="", pos1: str="", pos2: str=""
 ) -> dict:
-    prompt = get_prompt(chunk, standard_text_for_label)
+    prompt = get_prompt(chunk, standard_text_for_label, point)
     response: ChatResponse = chat(model='gpt-oss:20b', messages=[
         {
             'role': 'user',
@@ -239,6 +241,7 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
             if GUIDELINES_USE_DEFINITION_AS_LABEL
             else ""
         )
+        guideline_point = str(row.get(COL_POINT, "") or "")
         if not label_text_for_prompt:
             label_text_for_prompt = str(row.get(COL_LABEL, "") or "").strip()
 
@@ -247,13 +250,13 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
 
         pos1 = str(row.get(COL_PE1, "") or "")
         pos2 = str(row.get(COL_PE2, "") or "")
-        tasks.append((idx, chunk, label_text_for_prompt, pos1, pos2))
+        tasks.append((idx, chunk, label_text_for_prompt,guideline_point,  pos1, pos2))
 
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
         futures = {
-            ex.submit(call_chain, chain, chunk, label_text_for_prompt, pos1, pos2): idx
-            for (idx, chunk, label_text_for_prompt, pos1, pos2) in tasks
+            ex.submit(call_chain, chain, chunk, label_text_for_prompt,guideline_point, pos1, pos2): idx
+            for (idx, chunk, label_text_for_prompt,guideline_point, pos1, pos2) in tasks
         }
         for fut in tqdm(
             as_completed(futures), total=len(futures), desc=os.path.basename(path)
@@ -303,7 +306,7 @@ def main():
         return
 
     print(f"[INFO] 共找到 {len(paths)} 個輸入檔")
-    for p in paths:
+    for p in paths[0:1]:
         process_one_file(p, chain, pe_map)
 
 
