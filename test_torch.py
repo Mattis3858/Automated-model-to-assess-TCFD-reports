@@ -10,3 +10,5 @@ print(f"PyTorch CUDA version: {torch.version.cuda}")
 if torch.cuda.is_available():
     tensor = torch.rand(3, 3).cuda()
     print("Tensor is on GPU.")
+
+torch.cuda.empty_cache()

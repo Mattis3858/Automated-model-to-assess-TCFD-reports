@@ -19,12 +19,14 @@ from ollama import ChatResponse
 
 INPUT_DIR = "data/TCFD_report_improved_query_result"
 INPUT_PATTERN = "*_output_chunks.csv"
-POS_EXAMPLE_SOURCE = "data/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
+POS_EXAMPLE_SOURCE = (
+    "data/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
+)
 
 GUIDELINES_USE_DEFINITION_AS_LABEL = True
 
 MODEL_NAME = "gpt-4o-mini"
-MAX_WORKERS = 2
+MAX_WORKERS = 5
 SKIP_IF_OUTPUT_EXISTS = True
 
 COL_CHUNK = "Chunk Text"
@@ -38,7 +40,7 @@ COL_YN = "是否真的有揭露此標準?(Y/N)"
 COL_CONFIDENCE = "confidence"
 COL_COMPANY = "Company"
 COL_RANK = "Rank"
-OUTPUT_SUBDIR = "TCFD_report_improved_llm_answer_second_invocation"
+OUTPUT_SUBDIR = "TCFD_report_improved_llm_answer_second_invocation_gpt-oss-20b"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v2_few_shot.csv"
 
 
@@ -84,12 +86,17 @@ def load_pos_examples_from_verified(path: str) -> Dict[str, Tuple[str, str]]:
         pe_map[str(label)] = (str(row[COL_PE1]) or "", str(row[COL_PE2]) or "")
     return pe_map
 
-
-def get_prompt(chunk: str, standard_text_for_label: str, point:str="", pos1: str="", pos2: str="") -> str:
+def get_prompt(
+    chunk: str,
+    standard_text_for_label: str,
+    point: str = "",
+    pos1: str = "",
+    pos2: str = "",
+) -> str:
     return TCFD_LLM_ANSWER_PROMPT.format(
         chunk=chunk,
         label=standard_text_for_label,  # PROMPT 的 {label} 這裡放 Definition（或 Label 代碼，依你的配置）
-        point = point
+        point=point,
         # positive_example1=pos1,
         # positive_example2=pos2,
     )
@@ -113,15 +120,20 @@ def _return_default(retry_state):
 
 
 @retry(
-    stop=stop_after_attempt(1),
+    stop=stop_after_attempt(3),
     wait=wait_exponential(min=1, max=30),
     retry_error_callback=_return_default,
 )
 def call_chain(
-    chain:str="", chunk: str="", standard_text_for_label: str="",point:str="", pos1: str="", pos2: str=""
+    chain,
+    chunk: str = "",
+    standard_text_for_label: str = "",
+    point: str = "",
+    pos1: str = "",
+    pos2: str = "",
 ) -> dict:
     prompt = get_prompt(chunk, standard_text_for_label, point)
-    response: ChatResponse = chat(model='gpt-oss:20b', messages=[
+    response: ChatResponse = chat(model='gpt-oss:20b',think=True, messages=[
         {
             'role': 'user',
             'content': prompt,
@@ -129,12 +141,14 @@ def call_chain(
     ])
     parser = PydanticOutputParser(pydantic_object=ResultList)
     result = parser.parse(response.message.content)
-    # print(result)
+    # resp = chain.invoke({"input": prompt})
+    # result = resp.model_dump()
+    # # print(result)
     # if result.get("result")[0].get("confidence") < 0.8:
     #     second_chain = second_invocation_chain(api_key=os.getenv("OPENAI_API_KEY"))
     #     response = second_chain.invoke({"input": prompt})
     #     result = response.model_dump()
-        # print("\nSecond:", result)
+    #     # print("\nSecond:", result)
     return result.model_dump()
 
 
@@ -250,13 +264,28 @@ def process_one_file(path: str, chain, pe_map: Dict[str, Tuple[str, str]]):
 
         pos1 = str(row.get(COL_PE1, "") or "")
         pos2 = str(row.get(COL_PE2, "") or "")
-        tasks.append((idx, chunk, label_text_for_prompt,guideline_point,  pos1, pos2))
+        tasks.append((idx, chunk, label_text_for_prompt, guideline_point, pos1, pos2))
 
     results = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
         futures = {
-            ex.submit(call_chain, chain, chunk, label_text_for_prompt,guideline_point, pos1, pos2): idx
-            for (idx, chunk, label_text_for_prompt,guideline_point, pos1, pos2) in tasks
+            ex.submit(
+                call_chain,
+                chain,
+                chunk,
+                label_text_for_prompt,
+                guideline_point,
+                pos1,
+                pos2,
+            ): idx
+            for (
+                idx,
+                chunk,
+                label_text_for_prompt,
+                guideline_point,
+                pos1,
+                pos2,
+            ) in tasks
         }
         for fut in tqdm(
             as_completed(futures), total=len(futures), desc=os.path.basename(path)
@@ -306,7 +335,7 @@ def main():
         return
 
     print(f"[INFO] 共找到 {len(paths)} 個輸入檔")
-    for p in paths[0:1]:
+    for p in paths:
         process_one_file(p, chain, pe_map)
 
 
