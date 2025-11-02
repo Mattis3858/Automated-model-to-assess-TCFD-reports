@@ -9,6 +9,13 @@ from langchain_community.vectorstores import Chroma
 from FlagEmbedding import FlagReranker
 import torch
 
+EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-0.6B"
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+embeddings = HuggingFaceEmbeddings(
+    model_name=EMBEDDING_MODEL_NAME,
+    model_kwargs={"device": device},
+)
 
 def load_guidelines(excel_path: str, sheet_name: str = "工作表2"):
     df = pd.read_excel(excel_path, sheet_name=sheet_name)
@@ -32,14 +39,13 @@ def get_chroma_dirs(base_chroma_path: str):
 def main():
     load_dotenv()
     GUIDELINES_PATH = "data/tcfd第四層揭露指引.xlsx"
-    BASE_CHROMA_PATH = "chroma_report_TCFD"
-    OUTPUT_DIR = "data/TCFD_report_improved_query_result"
+    BASE_CHROMA_PATH = "chroma/chroma_report_TCFD"
+    OUTPUT_DIR = "data/TCFD_report_165_query_result"
 
     CANDIDATE_K = 50
     TOP_N = 5
-    EMBEDDING_MODEL_NAME = "Qwen/Qwen3-Embedding-0.6B"
-
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
     print(f"[INFO] Using device: {device}")
     print("CUDA 可用：", torch.cuda.is_available())
     print("可見 GPU 數量：", torch.cuda.device_count())
@@ -67,11 +73,6 @@ def main():
             continue
 
         print(f"\n--- 開始處理 {company_name} 的 ChromaDB ---")
-
-        embeddings = HuggingFaceEmbeddings(
-            model_name=EMBEDDING_MODEL_NAME,
-            model_kwargs={"device": device},
-        )
         # embeddings = OpenAIEmbeddings()
         try:
             db = Chroma(persist_directory=chroma_dir, embedding_function=embeddings)

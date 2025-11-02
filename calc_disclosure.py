@@ -3,8 +3,8 @@ import pandas as pd
 from glob import glob
 
 # ===== 可調參數 =====
-INPUT_DIR = "data/TCFD_report_improved_query_result/TCFD_report_improved_llm_answer_second_invocation_gpt-oss-20b"
-SUMMARY_DIR = "data/TCFD_report_improved_summary_gpt-oss-20b"
+INPUT_DIR = "data/TCFD_report_165_query_result/TCFD_report_165_llm_answer"
+SUMMARY_DIR = "data/TCFD_report_165_summary"
 PATTERN = "*_output_chunks_fewshot_with_CoT_v2_few_shot.csv"
 TOP_K_FOR_DECISION = 5
 Y_THRESHOLD_IN_TOPK = 1  

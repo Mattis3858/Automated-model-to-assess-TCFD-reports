@@ -10,8 +10,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import torch
 
 # ===== 可調參數 =====
-BASE_CHROMA_PATH = "chroma_report_TCFD"
-PDF_ROOT = "data/TCFD_reports_improved"
+BASE_CHROMA_PATH = "chroma/chroma_report_TCFD"
+PDF_ROOT = "data/TCFD_判讀用報告書_165"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_SPACE = "cosine"

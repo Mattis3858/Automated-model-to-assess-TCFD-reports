@@ -5,7 +5,7 @@ from pathlib import Path
 
 def compute_from_detailed():
     # Fallback: recompute matches quickly if detailed file is missing
-    company_path = Path("data/TCFD_report_improved_summary_gpt-oss-20b/company_label_summary.csv")
+    company_path = Path("data/TCFD_report_165_summary/company_label_summary.csv")
     bank_path = Path("data/銀行業_各組判讀結果.xlsx")
     def read_csv_robust(path):
         for enc in ["utf-8-sig", "utf-8", "cp950", "big5", "latin1"]:
@@ -103,7 +103,7 @@ acc_by_code_year = (
 overall_accuracy = float(np.round(valid["correct_num"].sum() / len(valid), 4)) if not valid.empty else np.nan
 
 # Save and display
-out_path = Path("data/TCFD_report_improved_summary_gpt-oss-20b/accuracy_by_company_year.csv")
+out_path = Path("data/TCFD_report_165_summary/accuracy_by_company_year.csv")
 acc_by_code_year.to_csv(out_path, index=False, encoding="utf-8-sig")
 
 print(f"Rows used: {len(valid)} / {len(df_detail)} | Overall accuracy (unchanged): {overall_accuracy}")

@@ -17,7 +17,7 @@ from prompt.V2 import TCFD_LLM_ANSWER_PROMPT
 from ollama import chat
 from ollama import ChatResponse
 
-INPUT_DIR = "data/TCFD_report_improved_query_result"
+INPUT_DIR = "data/TCFD_report_165_query_result"
 INPUT_PATTERN = "*_output_chunks.csv"
 POS_EXAMPLE_SOURCE = (
     "data/temp/富邦金控_2023_output_chunks_fewshot_with_CoT_v1_few_shot.csv"
@@ -40,7 +40,7 @@ COL_YN = "是否真的有揭露此標準?(Y/N)"
 COL_CONFIDENCE = "confidence"
 COL_COMPANY = "Company"
 COL_RANK = "Rank"
-OUTPUT_SUBDIR = "TCFD_report_improved_llm_answer_second_invocation_gpt-oss-20b"
+OUTPUT_SUBDIR = "TCFD_report_165_llm_answer"
 OUTPUT_SUFFIX = "_output_chunks_fewshot_with_CoT_v2_few_shot.csv"
 
 
@@ -133,23 +133,23 @@ def call_chain(
     pos2: str = "",
 ) -> dict:
     prompt = get_prompt(chunk, standard_text_for_label, point)
-    response: ChatResponse = chat(model='gpt-oss:20b',think=True, messages=[
-        {
-            'role': 'user',
-            'content': prompt,
-        },
-    ])
-    parser = PydanticOutputParser(pydantic_object=ResultList)
-    result = parser.parse(response.message.content)
-    # resp = chain.invoke({"input": prompt})
-    # result = resp.model_dump()
-    # # print(result)
-    # if result.get("result")[0].get("confidence") < 0.8:
-    #     second_chain = second_invocation_chain(api_key=os.getenv("OPENAI_API_KEY"))
-    #     response = second_chain.invoke({"input": prompt})
-    #     result = response.model_dump()
-    #     # print("\nSecond:", result)
-    return result.model_dump()
+    # response: ChatResponse = chat(model='gpt-oss:20b',think=True, messages=[
+    #     {
+    #         'role': 'user',
+    #         'content': prompt,
+    #     },
+    # ])
+    # parser = PydanticOutputParser(pydantic_object=ResultList)
+    # result = parser.parse(response.message.content)
+    resp = chain.invoke({"input": prompt})
+    result = resp.model_dump()
+    # print(result)
+    if result.get("result")[0].get("confidence") < 0.8:
+        second_chain = second_invocation_chain(api_key=os.getenv("OPENAI_API_KEY"))
+        response = second_chain.invoke({"input": prompt})
+        result = response.model_dump()
+        # print("\nSecond:", result)
+    return result
 
 
 def second_invocation_chain(api_key: str):
