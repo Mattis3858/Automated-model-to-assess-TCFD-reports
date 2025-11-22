@@ -100,6 +100,14 @@ acc_by_code_year = (
     .sort_values(["code", "year"])
 )
 
+acc_by_code_year = (
+    valid.groupby(["Company", "code", "year"])
+    .agg(total=("correct_num", "size"), correct=("correct_num", "sum"))
+    .assign(accuracy=lambda x: np.round(x["correct"].astype(float) / x["total"].astype(float), 4))
+    .reset_index()
+    .sort_values(["code", "year", "Company"]) 
+)
+
 overall_accuracy = float(np.round(valid["correct_num"].sum() / len(valid), 4)) if not valid.empty else np.nan
 
 # Save and display
