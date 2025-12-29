@@ -17,7 +17,7 @@ const Header = () => {
           <div className="bg-blue-600 p-1.5 rounded-lg text-white">
             <LayoutDashboard size={20} />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">ESG Analyzer</span>
+          <span className="text-xl font-bold tracking-tight text-white">Reports AI Analyzer</span>
         </div>
         
         <nav className="flex space-x-1">

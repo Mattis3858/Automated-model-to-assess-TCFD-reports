@@ -11,11 +11,10 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from prompt.TCFD_LLM_ANSWER_PROMPT import TCFD_LLM_ANSWER_PROMPT
 
-# 常數設定
-COL_CHUNK = "Content"    # 注意: core_logic 產出的 CSV 欄位是 "Content"
+COL_CHUNK = "Content" 
 COL_LABEL = "Label"
-COL_DEF = "Definition"   # core_logic 產出的 CSV 若無此欄位，需由 Excel 補回，或改用 Label
-COL_POINT = "Point"      # 若無此欄位可留空
+COL_DEF = "Definition"
+COL_POINT = "Point"
 COL_REASON = "reasoning"
 COL_YN = "is_disclosed"
 COL_CONFIDENCE = "confidence"
@@ -29,7 +28,7 @@ class ResultList(BaseModel):
     result: List[Result]
 
 class LLMAnalyzer:
-    def __init__(self, api_key: str, model_name: str = "gpt-4o-mini", workers: int = 5):
+    def __init__(self, api_key: str, model_name: str = "gpt-4o-mini", workers: int = 10):
         self.api_key = api_key
         self.model_name = model_name
         self.workers = workers

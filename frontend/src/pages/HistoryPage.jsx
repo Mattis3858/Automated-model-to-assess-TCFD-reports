@@ -2,11 +2,10 @@ import React from 'react';
 import { FileText, ExternalLink, Calendar, Search } from 'lucide-react';
 
 const HistoryPage = () => {
-  // 模擬資料清單
   const historyData = [
-    { id: '1', name: '2023_Sustainability_Report_Final.pdf', date: '2025-01-20', standard: 'TCFD', status: 'Completed' },
-    { id: '2', name: 'Carbon_Emission_Stats_Q4.pdf', date: '2025-01-18', standard: 'S1', status: 'Completed' },
-    { id: '3', name: 'Environmental_Impact_Study_v2.pdf', date: '2025-01-15', standard: 'TNFD', status: 'Completed' },
+    { id: '1', name: '2801_彰化銀行_2021_TCFD_報告書', date: '2025-12-25', standard: 'TCFD', status: 'Completed' },
+    { id: '2', name: '2801_彰化銀行_2020_TCFD_報告書', date: '2025-12-25', standard: 'TCFD', status: 'Completed' },
+    { id: '3', name: '2801_彰化銀行_2022_TCFD_報告書', date: '2025-12-28', standard: 'TCFD', status: 'Completed' },
   ];
 
   return (

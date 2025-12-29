@@ -1,4 +1,3 @@
-# core_logic.py
 import os
 import shutil
 import pandas as pd
@@ -7,30 +6,39 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from models import model_manager
-# --- 新增 ---
 from llm_analyzer import LLMAnalyzer
+import logging
 
-def process_pipeline(file_path: str, base_db_root: str, output_dir: str, standard: str, excel_path: str, force_update: bool):
-    """
-    Pipeline: PDF -> Vectorize -> Retrieve & Rerank (CSV) -> LLM Analysis (Final CSV)
-    """
+logger = logging.getLogger(__name__)
+
+def process_pipeline(file_path: str, base_db_root: str, output_dir: str, standard: str, excel_path: str, force_update: bool, update_callback=None):
+
     pdf_name = os.path.splitext(os.path.basename(file_path))[0]
     
-    # Step 1: Vectorize
     try:
         chroma_msg = process_pdf_to_chroma(file_path, base_db_root, standard, force_update)
     except Exception as e:
+        logger.error(f"Vectorization Failed: {str(e)}")
         return f"Vectorization Failed: {str(e)}"
 
     if not os.path.exists(excel_path):
         return f"Analysis Failed: Standard Excel not found at {excel_path}"
+
+    if update_callback:
+        logger.info("Updating status to Retrieving and Reranking")
+        update_callback("Step 2/3: Retrieving and Reranking...")
         
     try:
         analyze_msg, generated_files = run_rerank_analysis(
             standard, excel_path, base_db_root, output_dir, target_pdf_name=pdf_name
         )
     except Exception as e:
+        logger.error(f"Rerank Analysis Failed: {str(e)}")
         return f"Rerank Analysis Failed: {str(e)}"
+
+    if update_callback:
+        logger.info("Updating status to LLM Generating Insights")
+        update_callback("Step 3/3: LLM Generating Insights...")
 
     llm_msg = "LLM Skipped (No files)"
     if generated_files:
@@ -52,13 +60,13 @@ def process_pipeline(file_path: str, base_db_root: str, output_dir: str, standar
             llm_msg = ", ".join(llm_results)
             
         except Exception as e:
+            logger.error(f"LLM Failed: {str(e)}")
             return f"{analyze_msg} -> LLM Failed: {str(e)}"
 
     return f"Pipeline Completed. {chroma_msg} -> {analyze_msg} -> {llm_msg}"
 
 
 def process_pdf_to_chroma(file_path: str, base_db_root: str, standard: str, force_update: bool):
-    # (保持原樣)
     pdf_name = os.path.splitext(os.path.basename(file_path))[0]
     chroma_path = os.path.join(base_db_root, f"chroma_report_{standard}", pdf_name)
     
@@ -90,7 +98,7 @@ def process_pdf_to_chroma(file_path: str, base_db_root: str, standard: str, forc
 def run_rerank_analysis(standard_name: str, excel_path: str, base_db_root: str, output_dir: str, target_pdf_name: str = None) -> Tuple[str, List[str]]:
     df_guide = pd.read_excel(excel_path, sheet_name="工作表2")
     if "Definition" not in df_guide.columns and "Label" in df_guide.columns:
-         df_guide["Definition"] = df_guide["Label"]
+        df_guide["Definition"] = df_guide["Label"]
 
     guidelines = df_guide.to_dict(orient="records")
     standard_folder = os.path.join(base_db_root, f"chroma_report_{standard_name}")
@@ -112,6 +120,11 @@ def run_rerank_analysis(standard_name: str, excel_path: str, base_db_root: str, 
             continue
             
         comp_name = os.path.basename(chroma_dir)
+        clean_name = comp_name
+        if "_" in comp_name:
+            parts = comp_name.split('_', 1)
+            if len(parts) > 1:
+                clean_name = parts[1]
         db = Chroma(persist_directory=chroma_dir, embedding_function=model_manager.embeddings)
         
         output_records = []
@@ -141,10 +154,10 @@ def run_rerank_analysis(standard_name: str, excel_path: str, base_db_root: str, 
                 }
                 output_records.append(record)
 
-        out_path = os.path.join(output_dir, f"{comp_name}_rerank.csv")
+        out_path = os.path.join(output_dir, f"{clean_name}_rerank.csv")
         pd.DataFrame(output_records).to_csv(out_path, index=False, encoding="utf-8-sig")
         
-        results_summary.append(comp_name)
+        results_summary.append(clean_name)
         generated_files.append(out_path)
 
     return f"Rerank saved for: {', '.join(results_summary)}", generated_files
