@@ -1,0 +1,29 @@
+# Web Framework & Server
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.6
+
+# Data Processing
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# PDF Processing
+pymupdf>=1.23.0
+
+# LangChain Ecosystem
+langchain-community>=0.0.10
+langchain-core>=0.1.0
+langchain-text-splitters>=0.0.1
+langchain-openai>=0.0.5
+
+# Vector Database
+chromadb>=0.4.0
+
+# AI & Machine Learning
+torch>=2.0.0
+sentence-transformers>=2.2.0
+FlagEmbedding>=1.2.0
+
+tenacity>=8.2.0
+pydantic>=2.0.0
