@@ -7,7 +7,7 @@ import {
 const UploadPage = () => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState(null);
-  const [appState, setAppState] = useState('idle'); // idle, staged, uploading, processing, success, error
+  const [appState, setAppState] = useState('idle');
   const [progressMessage, setProgressMessage] = useState('');
   
   const [selectedStandard, setSelectedStandard] = useState('TCFD');

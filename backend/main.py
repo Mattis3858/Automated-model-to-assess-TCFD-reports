@@ -9,6 +9,8 @@ from models import model_manager
 import core_logic
 import uvicorn
 import logging
+import pandas as pd
+from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
 load_dotenv()
@@ -20,6 +22,7 @@ BASE_DB_ROOT = "chroma"
 UPLOAD_FOLDER = "data/uploads"
 OUTPUT_DIR = "data/results"
 STANDARD_DIR = "data/standards"
+SUMMARY_DIR = os.path.join(OUTPUT_DIR, "summary")
 
 for d in [UPLOAD_FOLDER, OUTPUT_DIR, STANDARD_DIR]: 
     os.makedirs(d, exist_ok=True)
@@ -105,5 +108,41 @@ def handle_full_pipeline_bg(tid, pdf_path, standard, excel_path, force):
     except Exception as e:
         processing_status[tid] = {"status": "failed", "message": str(e)}
 
+@app.get("/history/summary")
+async def get_history_summary():
+    summary_file = os.path.join(SUMMARY_DIR, "company_disclosure_summary.csv")
+    
+    if not os.path.exists(summary_file):
+        return []
+    
+    try:
+        df = pd.read_csv(summary_file)
+        result = df.to_dict(orient="records")
+        return result
+    except Exception as e:
+        logger.error(f"Error reading summary: {e}")
+        return []
+
+@app.get("/history/detail/{company_name}")
+async def get_company_detail(company_name: str):
+    detail_file = os.path.join(SUMMARY_DIR, "company_label_detail.csv")
+    
+    if not os.path.exists(detail_file):
+        raise HTTPException(status_code=404, detail="Detail file not found")
+        
+    try:
+        df = pd.read_csv(detail_file)
+        company_df = df[df["Company"] == company_name]
+        
+        if company_df.empty:
+            return {"message": "No details found for this company", "data": []}
+            
+        records = company_df.to_dict(orient="records")
+        return {"company": company_name, "data": records}
+        
+    except Exception as e:
+        logger.error(f"Error reading detail: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
